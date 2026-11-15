@@ -1,0 +1,1951 @@
+{
+  "date": "2026-11-09",
+  "collected_at": "2026-11-14T15:17:50+08:00",
+  "plates": [
+    {
+      "code": "801159",
+      "name": "机器人概念",
+      "strength": 11185,
+      "change_pct": 0.901,
+      "turnover": 405575172821,
+      "main_net": 2912779061
+    },
+    {
+      "code": "801843",
+      "name": "商业航天",
+      "strength": 7324,
+      "change_pct": 1.364,
+      "turnover": 219488734385,
+      "main_net": 3839137463
+    },
+    {
+      "code": "801216",
+      "name": "PCB概念",
+      "strength": 4102,
+      "change_pct": 1.025,
+      "turnover": 137347298430,
+      "main_net": 2687724507
+    },
+    {
+      "code": "801301",
+      "name": "体育产业",
+      "strength": 3830,
+      "change_pct": 0.397,
+      "turnover": 43035096750,
+      "main_net": 1657765310
+    },
+    {
+      "code": "801080",
+      "name": "煤炭",
+      "strength": 2564,
+      "change_pct": 1.643,
+      "turnover": 19483771524,
+      "main_net": 839651183
+    },
+    {
+      "code": "801807",
+      "name": "算力",
+      "strength": 2547,
+      "change_pct": 0.361,
+      "turnover": 457535138946,
+      "main_net": 3643249655
+    },
+    {
+      "code": "803023",
+      "name": "AI应用",
+      "strength": 1656,
+      "change_pct": -0.174,
+      "turnover": 232325732359,
+      "main_net": 26006989
+    },
+    {
+      "code": "801093",
+      "name": "天然气",
+      "strength": 1330,
+      "change_pct": 0.877,
+      "turnover": 29442560720,
+      "main_net": 193817760
+    },
+    {
+      "code": "801001",
+      "name": "芯片",
+      "strength": 1196,
+      "change_pct": 0.559,
+      "turnover": 567318715238,
+      "main_net": 3694165029
+    },
+    {
+      "code": "801829",
+      "name": "低空经济",
+      "strength": 1042,
+      "change_pct": 0.564,
+      "turnover": 128709150491,
+      "main_net": 384151731
+    },
+    {
+      "code": "801270",
+      "name": "基础建设",
+      "strength": 1034,
+      "change_pct": 0.024,
+      "turnover": 95854711444,
+      "main_net": 407858709
+    },
+    {
+      "code": "801250",
+      "name": "并购重组",
+      "strength": 1016,
+      "change_pct": 0.254,
+      "turnover": 234435792115,
+      "main_net": 536053416
+    },
+    {
+      "code": "801053",
+      "name": "零售",
+      "strength": 1005,
+      "change_pct": 0.149,
+      "turnover": 44923289783,
+      "main_net": 148906824
+    },
+    {
+      "code": "801418",
+      "name": "民营医院",
+      "strength": 986,
+      "change_pct": -0.134,
+      "turnover": 15198815414,
+      "main_net": 231816313
+    },
+    {
+      "code": "801095",
+      "name": "游戏",
+      "strength": 974,
+      "change_pct": -0.25,
+      "turnover": 58868143097,
+      "main_net": 797647302
+    },
+    {
+      "code": "801464",
+      "name": "农业",
+      "strength": 957,
+      "change_pct": -0.384,
+      "turnover": 69958784797,
+      "main_net": -58315156
+    },
+    {
+      "code": "801199",
+      "name": "汽车零部件",
+      "strength": 954,
+      "change_pct": 0.744,
+      "turnover": 349132564518,
+      "main_net": 799374872
+    },
+    {
+      "code": "801190",
+      "name": "卫星导航",
+      "strength": 927,
+      "change_pct": 1.565,
+      "turnover": 98010166748,
+      "main_net": 1329101726
+    },
+    {
+      "code": "803014",
+      "name": "海峡两岸",
+      "strength": 910,
+      "change_pct": 0.281,
+      "turnover": 108101471440,
+      "main_net": 98373298
+    },
+    {
+      "code": "801631",
+      "name": "次新股",
+      "strength": 861,
+      "change_pct": 0.723,
+      "turnover": 47516698125,
+      "main_net": 0
+    },
+    {
+      "code": "801070",
+      "name": "光伏",
+      "strength": 836,
+      "change_pct": -0.252,
+      "turnover": 240066777521,
+      "main_net": -163036903
+    },
+    {
+      "code": "801676",
+      "name": "地产链",
+      "strength": 768,
+      "change_pct": -0.261,
+      "turnover": 49437829750,
+      "main_net": 754708297
+    },
+    {
+      "code": "801248",
+      "name": "智能驾驶",
+      "strength": 728,
+      "change_pct": 0.705,
+      "turnover": 230524666491,
+      "main_net": 386567018
+    },
+    {
+      "code": "801377",
+      "name": "金刚石概念",
+      "strength": 625,
+      "change_pct": 1.259,
+      "turnover": 9063192456,
+      "main_net": 29118500
+    },
+    {
+      "code": "801048",
+      "name": "黄金",
+      "strength": 604,
+      "change_pct": 0.226,
+      "turnover": 33352524511,
+      "main_net": 343558981
+    },
+    {
+      "code": "801656",
+      "name": "热泵",
+      "strength": 604,
+      "change_pct": 1.516,
+      "turnover": 5257969725,
+      "main_net": 48459596
+    },
+    {
+      "code": "801358",
+      "name": "大飞机",
+      "strength": 588,
+      "change_pct": 1.033,
+      "turnover": 40178834456,
+      "main_net": 52709717
+    },
+    {
+      "code": "801660",
+      "name": "通信",
+      "strength": 570,
+      "change_pct": 0.873,
+      "turnover": 400001123441,
+      "main_net": 9245012820
+    },
+    {
+      "code": "801878",
+      "name": "端侧AI",
+      "strength": 567,
+      "change_pct": 0.84,
+      "turnover": 172749039290,
+      "main_net": 466355380
+    },
+    {
+      "code": "801612",
+      "name": "脑机接口",
+      "strength": 545,
+      "change_pct": 0.64,
+      "turnover": 30658767454,
+      "main_net": 418984213
+    },
+    {
+      "code": "801196",
+      "name": "LED",
+      "strength": 542,
+      "change_pct": 0.427,
+      "turnover": 8007038127,
+      "main_net": -260623264
+    },
+    {
+      "code": "801019",
+      "name": "物流",
+      "strength": 516,
+      "change_pct": 0.52,
+      "turnover": 65746965201,
+      "main_net": -100204060
+    },
+    {
+      "code": "801787",
+      "name": "实控人变更",
+      "strength": 508,
+      "change_pct": 0.58,
+      "turnover": 42823790647,
+      "main_net": 177772244
+    },
+    {
+      "code": "801082",
+      "name": "ST摘帽",
+      "strength": 502,
+      "change_pct": 0.32,
+      "turnover": 9722923545,
+      "main_net": 25602153
+    },
+    {
+      "code": "801088",
+      "name": "有色金属",
+      "strength": 492,
+      "change_pct": 0.158,
+      "turnover": 86012513041,
+      "main_net": 144419076
+    },
+    {
+      "code": "801123",
+      "name": "服装家纺",
+      "strength": 488,
+      "change_pct": -0.119,
+      "turnover": 14889170785,
+      "main_net": 27310638
+    },
+    {
+      "code": "801031",
+      "name": "文化传媒",
+      "strength": 476,
+      "change_pct": -0.148,
+      "turnover": 105976322010,
+      "main_net": 317810788
+    },
+    {
+      "code": "801120",
+      "name": "电力",
+      "strength": 457,
+      "change_pct": -0.344,
+      "turnover": 96893788061,
+      "main_net": -28519837
+    },
+    {
+      "code": "801067",
+      "name": "面板",
+      "strength": 403,
+      "change_pct": 0.404,
+      "turnover": 126511574747,
+      "main_net": 743740744
+    },
+    {
+      "code": "801880",
+      "name": "燃气轮机",
+      "strength": 394,
+      "change_pct": 0.947,
+      "turnover": 16068049392,
+      "main_net": -101067150
+    },
+    {
+      "code": "801584",
+      "name": "数字经济",
+      "strength": 394,
+      "change_pct": 0.102,
+      "turnover": 402772181663,
+      "main_net": -824129995
+    },
+    {
+      "code": "801052",
+      "name": "环保",
+      "strength": 363,
+      "change_pct": -0.128,
+      "turnover": 54485330815,
+      "main_net": -221636658
+    },
+    {
+      "code": "801046",
+      "name": "医疗器械",
+      "strength": 315,
+      "change_pct": 0,
+      "turnover": 64527996159,
+      "main_net": -296047580
+    },
+    {
+      "code": "801235",
+      "name": "化工",
+      "strength": 247,
+      "change_pct": -0.116,
+      "turnover": 157627001226,
+      "main_net": -620905265
+    },
+    {
+      "code": "801578",
+      "name": "铀矿",
+      "strength": 166,
+      "change_pct": 1.665,
+      "turnover": 1586732153,
+      "main_net": 0
+    },
+    {
+      "code": "801657",
+      "name": "减速器",
+      "strength": 161,
+      "change_pct": 2.144,
+      "turnover": 42676361678,
+      "main_net": 489909945
+    },
+    {
+      "code": "801209",
+      "name": "振兴东北",
+      "strength": 138,
+      "change_pct": 2.308,
+      "turnover": 5344995095,
+      "main_net": -1461842
+    },
+    {
+      "code": "801589",
+      "name": "电机电控",
+      "strength": 130,
+      "change_pct": 1.301,
+      "turnover": 15067156442,
+      "main_net": 132793873
+    },
+    {
+      "code": "801978",
+      "name": "中科系",
+      "strength": 123,
+      "change_pct": 1.232,
+      "turnover": 4905264368,
+      "main_net": 0
+    },
+    {
+      "code": "801777",
+      "name": "AMD概念",
+      "strength": 122,
+      "change_pct": 1.902,
+      "turnover": 30220586034,
+      "main_net": -4064309
+    },
+    {
+      "code": "803041",
+      "name": "光通信",
+      "strength": 121,
+      "change_pct": 1.409,
+      "turnover": 256694443921,
+      "main_net": 631160555
+    },
+    {
+      "code": "801995",
+      "name": "MIM",
+      "strength": 113,
+      "change_pct": 1.718,
+      "turnover": 11419331914,
+      "main_net": 2033337
+    },
+    {
+      "code": "803012",
+      "name": "SOFC电池",
+      "strength": 107,
+      "change_pct": 1.079,
+      "turnover": 17020115062,
+      "main_net": 0
+    },
+    {
+      "code": "801788",
+      "name": "仪器仪表",
+      "strength": 103,
+      "change_pct": 1.032,
+      "turnover": 11877035073,
+      "main_net": 46549156
+    },
+    {
+      "code": "803029",
+      "name": "物理AI",
+      "strength": 98,
+      "change_pct": 1.197,
+      "turnover": 80015988762,
+      "main_net": 42624831
+    },
+    {
+      "code": "801896",
+      "name": "成人用品",
+      "strength": 98,
+      "change_pct": 0.983,
+      "turnover": 3174002980,
+      "main_net": 33019536
+    },
+    {
+      "code": "801027",
+      "name": "银行",
+      "strength": 98,
+      "change_pct": 0.981,
+      "turnover": 30653558864,
+      "main_net": 851674339
+    },
+    {
+      "code": "801411",
+      "name": "柔性屏",
+      "strength": 97,
+      "change_pct": 1.2,
+      "turnover": 36093289105,
+      "main_net": 47409318
+    },
+    {
+      "code": "803017",
+      "name": "消防",
+      "strength": 92,
+      "change_pct": 0.925,
+      "turnover": 1942569491,
+      "main_net": -1213057
+    },
+    {
+      "code": "801437",
+      "name": "传感器",
+      "strength": 91,
+      "change_pct": 1.112,
+      "turnover": 74201046096,
+      "main_net": 281220762
+    },
+    {
+      "code": "801012",
+      "name": "钢铁",
+      "strength": 89,
+      "change_pct": 0.235,
+      "turnover": 7983964738,
+      "main_net": -6553896
+    },
+    {
+      "code": "801045",
+      "name": "医药",
+      "strength": 88,
+      "change_pct": -0.286,
+      "turnover": 125892803447,
+      "main_net": -357732413
+    },
+    {
+      "code": "801433",
+      "name": "光学镜头",
+      "strength": 84,
+      "change_pct": 0.845,
+      "turnover": 11892780829,
+      "main_net": -57376496
+    },
+    {
+      "code": "801623",
+      "name": "远东开发",
+      "strength": 78,
+      "change_pct": 1.184,
+      "turnover": 17158835355,
+      "main_net": 84224
+    },
+    {
+      "code": "801825",
+      "name": "烟花爆竹",
+      "strength": 72,
+      "change_pct": 0.729,
+      "turnover": 818519982,
+      "main_net": 6794661
+    },
+    {
+      "code": "801062",
+      "name": "军工",
+      "strength": 66,
+      "change_pct": 0.84,
+      "turnover": 215140145123,
+      "main_net": 239495944
+    },
+    {
+      "code": "801177",
+      "name": "无人机",
+      "strength": 63,
+      "change_pct": 0.707,
+      "turnover": 119935975225,
+      "main_net": 204738867
+    },
+    {
+      "code": "801909",
+      "name": "可转债",
+      "strength": 61,
+      "change_pct": 0.617,
+      "turnover": 62588176039,
+      "main_net": 391570312
+    },
+    {
+      "code": "801169",
+      "name": "VR/AR/MR",
+      "strength": 60,
+      "change_pct": 0.829,
+      "turnover": 108281960995,
+      "main_net": 137868018
+    },
+    {
+      "code": "801964",
+      "name": "压缩机",
+      "strength": 59,
+      "change_pct": 1.15,
+      "turnover": 9164004465,
+      "main_net": 33005029
+    },
+    {
+      "code": "801580",
+      "name": "发电机",
+      "strength": 55,
+      "change_pct": 0.559,
+      "turnover": 10326752820,
+      "main_net": 51297140
+    },
+    {
+      "code": "801198",
+      "name": "送转填权",
+      "strength": 55,
+      "change_pct": 0.65,
+      "turnover": 47570983743,
+      "main_net": 56258055
+    },
+    {
+      "code": "801359",
+      "name": "华为海思",
+      "strength": 53,
+      "change_pct": 0.538,
+      "turnover": 16129808071,
+      "main_net": 3140996
+    },
+    {
+      "code": "801445",
+      "name": "元器件",
+      "strength": 52,
+      "change_pct": 0.698,
+      "turnover": 53496308856,
+      "main_net": 521541430
+    },
+    {
+      "code": "801136",
+      "name": "安防",
+      "strength": 47,
+      "change_pct": 0.854,
+      "turnover": 16390779197,
+      "main_net": -96086619
+    },
+    {
+      "code": "801636",
+      "name": "露营经济",
+      "strength": 46,
+      "change_pct": 0.465,
+      "turnover": 4247285104,
+      "main_net": 5843158
+    },
+    {
+      "code": "801139",
+      "name": "培育钻石",
+      "strength": 44,
+      "change_pct": 0.974,
+      "turnover": 5175934654,
+      "main_net": -979367
+    },
+    {
+      "code": "801529",
+      "name": "激光",
+      "strength": 44,
+      "change_pct": 0.441,
+      "turnover": 15268367010,
+      "main_net": -25408579
+    },
+    {
+      "code": "801419",
+      "name": "通用航空",
+      "strength": 35,
+      "change_pct": 0.574,
+      "turnover": 7237161571,
+      "main_net": 3411281
+    },
+    {
+      "code": "801595",
+      "name": "北交所",
+      "strength": 33,
+      "change_pct": 0.367,
+      "turnover": 12113514010,
+      "main_net": 0
+    },
+    {
+      "code": "801375",
+      "name": "新材料概念",
+      "strength": 33,
+      "change_pct": 0.411,
+      "turnover": 92429049908,
+      "main_net": 138942451
+    },
+    {
+      "code": "801164",
+      "name": "自行车",
+      "strength": 32,
+      "change_pct": 0.322,
+      "turnover": 1126234344,
+      "main_net": 1548577
+    },
+    {
+      "code": "801363",
+      "name": "黑龙江自贸区",
+      "strength": 30,
+      "change_pct": 1.922,
+      "turnover": 2165227538,
+      "main_net": 387689
+    },
+    {
+      "code": "801511",
+      "name": "新型工业化",
+      "strength": 30,
+      "change_pct": 0.399,
+      "turnover": 152311689927,
+      "main_net": 407765572
+    },
+    {
+      "code": "801773",
+      "name": "热力",
+      "strength": 29,
+      "change_pct": 0.295,
+      "turnover": 3051560595,
+      "main_net": -7477808
+    },
+    {
+      "code": "801522",
+      "name": "专精特新",
+      "strength": 27,
+      "change_pct": 0.361,
+      "turnover": 158827553461,
+      "main_net": -125376377
+    },
+    {
+      "code": "801430",
+      "name": "智能交通",
+      "strength": 25,
+      "change_pct": 0.718,
+      "turnover": 20801524013,
+      "main_net": 109201542
+    },
+    {
+      "code": "801850",
+      "name": "食品安全",
+      "strength": 25,
+      "change_pct": 0.252,
+      "turnover": 13227388087,
+      "main_net": -13304408
+    },
+    {
+      "code": "801168",
+      "name": "工业气体",
+      "strength": 24,
+      "change_pct": 0.243,
+      "turnover": 2970571900,
+      "main_net": 17825298
+    },
+    {
+      "code": "801069",
+      "name": "家电",
+      "strength": 22,
+      "change_pct": 0.331,
+      "turnover": 46708712437,
+      "main_net": 603404062
+    },
+    {
+      "code": "801016",
+      "name": "稀土永磁",
+      "strength": 20,
+      "change_pct": 0.334,
+      "turnover": 25162082245,
+      "main_net": -99484874
+    },
+    {
+      "code": "801932",
+      "name": "海洋经济",
+      "strength": 19,
+      "change_pct": 0.376,
+      "turnover": 97259125584,
+      "main_net": 36521916
+    },
+    {
+      "code": "801218",
+      "name": "华为概念",
+      "strength": 18,
+      "change_pct": 0.346,
+      "turnover": 416574365238,
+      "main_net": 50178309
+    },
+    {
+      "code": "801575",
+      "name": "智慧矿山",
+      "strength": 18,
+      "change_pct": 0.183,
+      "turnover": 5108539383,
+      "main_net": 32884432
+    },
+    {
+      "code": "801132",
+      "name": "粤港澳",
+      "strength": 17,
+      "change_pct": 0.365,
+      "turnover": 76385742210,
+      "main_net": 8341903
+    },
+    {
+      "code": "801408",
+      "name": "智能家居",
+      "strength": 17,
+      "change_pct": 0.171,
+      "turnover": 52802722434,
+      "main_net": 8941051
+    },
+    {
+      "code": "801745",
+      "name": "四川省",
+      "strength": 16,
+      "change_pct": 0.168,
+      "turnover": 44732680310,
+      "main_net": 9401620
+    },
+    {
+      "code": "801649",
+      "name": "两轮车",
+      "strength": 16,
+      "change_pct": 0.162,
+      "turnover": 7747284151,
+      "main_net": 23516539
+    },
+    {
+      "code": "801694",
+      "name": "非金属材料",
+      "strength": 14,
+      "change_pct": 0.149,
+      "turnover": 24518455600,
+      "main_net": 26642893
+    },
+    {
+      "code": "801351",
+      "name": "科创板",
+      "strength": 14,
+      "change_pct": 0.258,
+      "turnover": 220595197284,
+      "main_net": 18658147
+    },
+    {
+      "code": "801321",
+      "name": "广电网",
+      "strength": 14,
+      "change_pct": 0.141,
+      "turnover": 10000310282,
+      "main_net": -44375808
+    },
+    {
+      "code": "801319",
+      "name": "福建",
+      "strength": 13,
+      "change_pct": 0.307,
+      "turnover": 46876089227,
+      "main_net": -20680717
+    },
+    {
+      "code": "801241",
+      "name": "核污染概念",
+      "strength": 12,
+      "change_pct": 0.271,
+      "turnover": 9887473535,
+      "main_net": 10425004
+    },
+    {
+      "code": "801493",
+      "name": "光储充一体化",
+      "strength": 10,
+      "change_pct": 0.483,
+      "turnover": 6342750127,
+      "main_net": 189896295
+    },
+    {
+      "code": "801246",
+      "name": "水务",
+      "strength": 9,
+      "change_pct": 0.096,
+      "turnover": 1346517176,
+      "main_net": 5512055
+    },
+    {
+      "code": "801553",
+      "name": "元宇宙",
+      "strength": 9,
+      "change_pct": 0.272,
+      "turnover": 139886195307,
+      "main_net": -184620482
+    },
+    {
+      "code": "801751",
+      "name": "广东省",
+      "strength": 8,
+      "change_pct": 0.205,
+      "turnover": 241003473046,
+      "main_net": -52612657
+    },
+    {
+      "code": "801284",
+      "name": "举牌",
+      "strength": 8,
+      "change_pct": 0.085,
+      "turnover": 15393262915,
+      "main_net": 37244836
+    },
+    {
+      "code": "801133",
+      "name": "eSIM",
+      "strength": 7,
+      "change_pct": 0.072,
+      "turnover": 3633503392,
+      "main_net": 0
+    },
+    {
+      "code": "801366",
+      "name": "业绩增长",
+      "strength": 7,
+      "change_pct": 0.185,
+      "turnover": 882522032215,
+      "main_net": 60101876
+    },
+    {
+      "code": "801386",
+      "name": "轨道交通",
+      "strength": 6,
+      "change_pct": 0.189,
+      "turnover": 37702371620,
+      "main_net": 105584526
+    },
+    {
+      "code": "801165",
+      "name": "氢能源",
+      "strength": 5,
+      "change_pct": 0.315,
+      "turnover": 117595955972,
+      "main_net": 938555517
+    },
+    {
+      "code": "801754",
+      "name": "江苏省",
+      "strength": 4,
+      "change_pct": 0.309,
+      "turnover": 165737204491,
+      "main_net": 7406323
+    },
+    {
+      "code": "801086",
+      "name": "玻璃",
+      "strength": 4,
+      "change_pct": 0.046,
+      "turnover": 10060615583,
+      "main_net": 4584468
+    },
+    {
+      "code": "803039",
+      "name": "储气罐",
+      "strength": 4,
+      "change_pct": 0.043,
+      "turnover": 6471087763,
+      "main_net": -4087212
+    },
+    {
+      "code": "801768",
+      "name": "陕西省",
+      "strength": 2,
+      "change_pct": 0.47,
+      "turnover": 23359686549,
+      "main_net": 16931096
+    },
+    {
+      "code": "801379",
+      "name": "碳纤维",
+      "strength": 2,
+      "change_pct": 0.028,
+      "turnover": 17887180333,
+      "main_net": 650289
+    },
+    {
+      "code": "801085",
+      "name": "人工智能",
+      "strength": 0,
+      "change_pct": 0.138,
+      "turnover": 577711694321,
+      "main_net": -116461296
+    },
+    {
+      "code": "801871",
+      "name": "汽车充电",
+      "strength": 0,
+      "change_pct": 0.146,
+      "turnover": 141565257739,
+      "main_net": -6903351
+    },
+    {
+      "code": "801572",
+      "name": "中报增长",
+      "strength": 0,
+      "change_pct": 0.104,
+      "turnover": 894341266656,
+      "main_net": 92768417
+    },
+    {
+      "code": "801705",
+      "name": "超导概念",
+      "strength": 0,
+      "change_pct": 0.309,
+      "turnover": 11977635549,
+      "main_net": 947950
+    },
+    {
+      "code": "801950",
+      "name": "中欧概念",
+      "strength": 0,
+      "change_pct": 0.155,
+      "turnover": 14326136960,
+      "main_net": 5467349
+    },
+    {
+      "code": "801374",
+      "name": "造船",
+      "strength": 0,
+      "change_pct": -0.007,
+      "turnover": 7941840018,
+      "main_net": 102418721
+    },
+    {
+      "code": "801874",
+      "name": "电源",
+      "strength": -1,
+      "change_pct": -0.017,
+      "turnover": 37724462954,
+      "main_net": 9824307
+    },
+    {
+      "code": "801087",
+      "name": "风电",
+      "strength": -3,
+      "change_pct": 0.218,
+      "turnover": 102609012185,
+      "main_net": 160815240
+    },
+    {
+      "code": "801457",
+      "name": "武汉",
+      "strength": -3,
+      "change_pct": -0.039,
+      "turnover": 19272476989,
+      "main_net": -4548659
+    },
+    {
+      "code": "801740",
+      "name": "上海市",
+      "strength": -4,
+      "change_pct": 0.134,
+      "turnover": 127859137197,
+      "main_net": -4938461
+    },
+    {
+      "code": "801399",
+      "name": "智慧城市",
+      "strength": -5,
+      "change_pct": 0.148,
+      "turnover": 58816116409,
+      "main_net": 27692284
+    },
+    {
+      "code": "801614",
+      "name": "电子纸",
+      "strength": -5,
+      "change_pct": -0.052,
+      "turnover": 3614971152,
+      "main_net": 889469
+    },
+    {
+      "code": "801153",
+      "name": "创投",
+      "strength": -5,
+      "change_pct": 0.129,
+      "turnover": 73883174977,
+      "main_net": 393510
+    },
+    {
+      "code": "801273",
+      "name": "股权转让",
+      "strength": -5,
+      "change_pct": 0.121,
+      "turnover": 272429659519,
+      "main_net": 34103411
+    },
+    {
+      "code": "801114",
+      "name": "外贸",
+      "strength": -6,
+      "change_pct": 0.087,
+      "turnover": 183165833182,
+      "main_net": -114054146
+    },
+    {
+      "code": "801306",
+      "name": "深圳",
+      "strength": -6,
+      "change_pct": 0.092,
+      "turnover": 95388627582,
+      "main_net": -47148996
+    },
+    {
+      "code": "801157",
+      "name": "智慧停车",
+      "strength": -6,
+      "change_pct": -0.069,
+      "turnover": 1095826921,
+      "main_net": -35185448
+    },
+    {
+      "code": "801076",
+      "name": "乡村振兴",
+      "strength": -6,
+      "change_pct": 0.035,
+      "turnover": 70875154996,
+      "main_net": 8308961
+    },
+    {
+      "code": "801613",
+      "name": "幽门螺杆菌",
+      "strength": -7,
+      "change_pct": -0.072,
+      "turnover": 3900488890,
+      "main_net": -1559726
+    },
+    {
+      "code": "801033",
+      "name": "国有企业",
+      "strength": -7,
+      "change_pct": 0.062,
+      "turnover": 361097619195,
+      "main_net": -104630998
+    },
+    {
+      "code": "801115",
+      "name": "海南",
+      "strength": -7,
+      "change_pct": 0.29,
+      "turnover": 12627220724,
+      "main_net": 80951539
+    },
+    {
+      "code": "801075",
+      "name": "自主可控",
+      "strength": -7,
+      "change_pct": -0.079,
+      "turnover": 25227830501,
+      "main_net": -2402357
+    },
+    {
+      "code": "801471",
+      "name": "免税",
+      "strength": -8,
+      "change_pct": 0.15,
+      "turnover": 8518046515,
+      "main_net": -74623303
+    },
+    {
+      "code": "801470",
+      "name": "西部大开发",
+      "strength": -9,
+      "change_pct": 0.064,
+      "turnover": 166737617285,
+      "main_net": -31155733
+    },
+    {
+      "code": "801117",
+      "name": "港口",
+      "strength": -9,
+      "change_pct": -0.1,
+      "turnover": 1916846541,
+      "main_net": 84024986
+    },
+    {
+      "code": "801310",
+      "name": "浙江",
+      "strength": -10,
+      "change_pct": 0.029,
+      "turnover": 153957992147,
+      "main_net": 258787360
+    },
+    {
+      "code": "803034",
+      "name": "打印机",
+      "strength": -10,
+      "change_pct": -0.105,
+      "turnover": 11082239407,
+      "main_net": 0
+    },
+    {
+      "code": "801760",
+      "name": "湖北省",
+      "strength": -11,
+      "change_pct": -0.111,
+      "turnover": 38503333517,
+      "main_net": -9982848
+    },
+    {
+      "code": "801350",
+      "name": "一带一路",
+      "strength": -11,
+      "change_pct": 0.05,
+      "turnover": 181349342422,
+      "main_net": 80201192
+    },
+    {
+      "code": "801642",
+      "name": "石英材料",
+      "strength": -13,
+      "change_pct": -0.137,
+      "turnover": 3816636893,
+      "main_net": 6436120
+    },
+    {
+      "code": "801452",
+      "name": "再融资",
+      "strength": -13,
+      "change_pct": -0.071,
+      "turnover": 69723981830,
+      "main_net": 36481697
+    },
+    {
+      "code": "801050",
+      "name": "彩票概念",
+      "strength": -13,
+      "change_pct": -0.139,
+      "turnover": 3543447947,
+      "main_net": 20020268
+    },
+    {
+      "code": "801635",
+      "name": "平台经济",
+      "strength": -15,
+      "change_pct": -0.083,
+      "turnover": 127278146094,
+      "main_net": -50067734
+    },
+    {
+      "code": "801439",
+      "name": "网红经济",
+      "strength": -18,
+      "change_pct": 0.002,
+      "turnover": 76609828695,
+      "main_net": 87419269
+    },
+    {
+      "code": "801450",
+      "name": "年报预增",
+      "strength": -18,
+      "change_pct": -0.188,
+      "turnover": 52503034095,
+      "main_net": -8458409
+    },
+    {
+      "code": "801632",
+      "name": "新型城镇化",
+      "strength": -18,
+      "change_pct": 0.001,
+      "turnover": 25168755354,
+      "main_net": -50963061
+    },
+    {
+      "code": "801313",
+      "name": "金融概念",
+      "strength": -19,
+      "change_pct": -0.044,
+      "turnover": 121834302285,
+      "main_net": -642774275
+    },
+    {
+      "code": "801733",
+      "name": "中特估",
+      "strength": -20,
+      "change_pct": -0.204,
+      "turnover": 64951296875,
+      "main_net": -29197743
+    },
+    {
+      "code": "801332",
+      "name": "大麻",
+      "strength": -20,
+      "change_pct": 0.144,
+      "turnover": 8803780021,
+      "main_net": 269351653
+    },
+    {
+      "code": "801146",
+      "name": "阿里巴巴概念",
+      "strength": -22,
+      "change_pct": -0.121,
+      "turnover": 137241396908,
+      "main_net": 52976217
+    },
+    {
+      "code": "801637",
+      "name": "文创产品",
+      "strength": -23,
+      "change_pct": -0.091,
+      "turnover": 42489604313,
+      "main_net": 142721706
+    },
+    {
+      "code": "801743",
+      "name": "北京市",
+      "strength": -23,
+      "change_pct": -0.127,
+      "turnover": 164742921164,
+      "main_net": -151233010
+    },
+    {
+      "code": "801210",
+      "name": "操作系统",
+      "strength": -23,
+      "change_pct": -0.238,
+      "turnover": 21286024505,
+      "main_net": -76780921
+    },
+    {
+      "code": "801346",
+      "name": "智能电网",
+      "strength": -24,
+      "change_pct": -0.223,
+      "turnover": 165607857642,
+      "main_net": 187166502
+    },
+    {
+      "code": "801057",
+      "name": "石油石化",
+      "strength": -24,
+      "change_pct": 0.053,
+      "turnover": 21249070521,
+      "main_net": -372994458
+    },
+    {
+      "code": "801467",
+      "name": "REITs",
+      "strength": -25,
+      "change_pct": -0.255,
+      "turnover": 11002479061,
+      "main_net": -12228252
+    },
+    {
+      "code": "801530",
+      "name": "中字头",
+      "strength": -25,
+      "change_pct": -0.258,
+      "turnover": 50737272328,
+      "main_net": -113532608
+    },
+    {
+      "code": "801211",
+      "name": "新疆",
+      "strength": -26,
+      "change_pct": -0.078,
+      "turnover": 18496225023,
+      "main_net": -9842330
+    },
+    {
+      "code": "801369",
+      "name": "病毒防治",
+      "strength": -26,
+      "change_pct": -0.134,
+      "turnover": 95129363846,
+      "main_net": 470811012
+    },
+    {
+      "code": "801541",
+      "name": "生物质能",
+      "strength": -26,
+      "change_pct": -0.101,
+      "turnover": 9254966113,
+      "main_net": -8119970
+    },
+    {
+      "code": "803024",
+      "name": "低价股",
+      "strength": -28,
+      "change_pct": -0.15,
+      "turnover": 326071006660,
+      "main_net": -90959402
+    },
+    {
+      "code": "801143",
+      "name": "百度概念",
+      "strength": -28,
+      "change_pct": -0.289,
+      "turnover": 56903632982,
+      "main_net": 6931792
+    },
+    {
+      "code": "801035",
+      "name": "酿酒",
+      "strength": -29,
+      "change_pct": -0.296,
+      "turnover": 17924001189,
+      "main_net": -217971471
+    },
+    {
+      "code": "801071",
+      "name": "保险",
+      "strength": -29,
+      "change_pct": -0.298,
+      "turnover": 4222992585,
+      "main_net": -1232066
+    },
+    {
+      "code": "801193",
+      "name": "知识产权",
+      "strength": -29,
+      "change_pct": -0.006,
+      "turnover": 24673752590,
+      "main_net": -26673238
+    },
+    {
+      "code": "801059",
+      "name": "字节概念",
+      "strength": -30,
+      "change_pct": -0.201,
+      "turnover": 100176264524,
+      "main_net": -162336381
+    },
+    {
+      "code": "801162",
+      "name": "超跌",
+      "strength": -30,
+      "change_pct": -0.266,
+      "turnover": 103711428353,
+      "main_net": -11280266
+    },
+    {
+      "code": "801611",
+      "name": "虚拟人",
+      "strength": -31,
+      "change_pct": -0.316,
+      "turnover": 43726543495,
+      "main_net": -59987328
+    },
+    {
+      "code": "801020",
+      "name": "疫苗概念",
+      "strength": -31,
+      "change_pct": 0.08,
+      "turnover": 15856187373,
+      "main_net": 368355231
+    },
+    {
+      "code": "801862",
+      "name": "高股息精选",
+      "strength": -32,
+      "change_pct": -0.288,
+      "turnover": 70068960822,
+      "main_net": -49107522
+    },
+    {
+      "code": "801373",
+      "name": "ETC",
+      "strength": -32,
+      "change_pct": -0.325,
+      "turnover": 7233622517,
+      "main_net": 3789236
+    },
+    {
+      "code": "801856",
+      "name": "破净股概念",
+      "strength": -32,
+      "change_pct": -0.271,
+      "turnover": 87675146651,
+      "main_net": -96350638
+    },
+    {
+      "code": "801576",
+      "name": "石墨化",
+      "strength": -33,
+      "change_pct": -0.067,
+      "turnover": 32047592245,
+      "main_net": -6716551
+    },
+    {
+      "code": "801148",
+      "name": "碳中和",
+      "strength": -33,
+      "change_pct": -0.026,
+      "turnover": 66925670203,
+      "main_net": 17379792
+    },
+    {
+      "code": "801719",
+      "name": "腾讯概念",
+      "strength": -34,
+      "change_pct": -0.266,
+      "turnover": 98735776960,
+      "main_net": -31890619
+    },
+    {
+      "code": "801672",
+      "name": "web3.0",
+      "strength": -35,
+      "change_pct": -0.353,
+      "turnover": 33193594605,
+      "main_net": -28487019
+    },
+    {
+      "code": "801764",
+      "name": "西藏自治区",
+      "strength": -35,
+      "change_pct": -0.355,
+      "turnover": 6400247977,
+      "main_net": 0
+    },
+    {
+      "code": "801651",
+      "name": "湖南",
+      "strength": -35,
+      "change_pct": -0.276,
+      "turnover": 34591104546,
+      "main_net": -27453053
+    },
+    {
+      "code": "801970",
+      "name": "集装箱",
+      "strength": -38,
+      "change_pct": -0.382,
+      "turnover": 2555810667,
+      "main_net": 0
+    },
+    {
+      "code": "801330",
+      "name": "旅游",
+      "strength": -39,
+      "change_pct": -0.138,
+      "turnover": 26741359843,
+      "main_net": -123211476
+    },
+    {
+      "code": "801762",
+      "name": "甘肃省",
+      "strength": -40,
+      "change_pct": -0.403,
+      "turnover": 8189479783,
+      "main_net": -1951820
+    },
+    {
+      "code": "801128",
+      "name": "国产软件",
+      "strength": -40,
+      "change_pct": -0.407,
+      "turnover": 43188183787,
+      "main_net": 327485587
+    },
+    {
+      "code": "801328",
+      "name": "消费电子",
+      "strength": -43,
+      "change_pct": 0.697,
+      "turnover": 326930065953,
+      "main_net": 425692701
+    },
+    {
+      "code": "801184",
+      "name": "包装印刷",
+      "strength": -45,
+      "change_pct": -0.324,
+      "turnover": 6949188182,
+      "main_net": 92287735
+    },
+    {
+      "code": "801735",
+      "name": "中船系",
+      "strength": -46,
+      "change_pct": -0.467,
+      "turnover": 4173611170,
+      "main_net": -605319
+    },
+    {
+      "code": "801462",
+      "name": "RCS",
+      "strength": -47,
+      "change_pct": -0.149,
+      "turnover": 7912785711,
+      "main_net": -14449286
+    },
+    {
+      "code": "801039",
+      "name": "机场航空",
+      "strength": -48,
+      "change_pct": -0.485,
+      "turnover": 3874249870,
+      "main_net": -80215387
+    },
+    {
+      "code": "801287",
+      "name": "养老概念",
+      "strength": -48,
+      "change_pct": -0.349,
+      "turnover": 26303220048,
+      "main_net": -4469802
+    },
+    {
+      "code": "801243",
+      "name": "宠物经济",
+      "strength": -49,
+      "change_pct": -0.399,
+      "turnover": 15647537106,
+      "main_net": -31714007
+    },
+    {
+      "code": "801100",
+      "name": "生育概念",
+      "strength": -49,
+      "change_pct": -0.282,
+      "turnover": 36259506545,
+      "main_net": 522806349
+    },
+    {
+      "code": "801182",
+      "name": "雄安新区",
+      "strength": -49,
+      "change_pct": -0.32,
+      "turnover": 18612172785,
+      "main_net": -28545840
+    },
+    {
+      "code": "801587",
+      "name": "光热发电",
+      "strength": -50,
+      "change_pct": -0.503,
+      "turnover": 11873823288,
+      "main_net": -12963007
+    },
+    {
+      "code": "801202",
+      "name": "世界杯概念",
+      "strength": -50,
+      "change_pct": -0.506,
+      "turnover": 6571843560,
+      "main_net": 77311
+    },
+    {
+      "code": "801227",
+      "name": "烟草",
+      "strength": -52,
+      "change_pct": -0.183,
+      "turnover": 4308627270,
+      "main_net": 2733145
+    },
+    {
+      "code": "801990",
+      "name": "外卖概念",
+      "strength": -53,
+      "change_pct": -0.179,
+      "turnover": 3574784504,
+      "main_net": 7464590
+    },
+    {
+      "code": "801081",
+      "name": "证券",
+      "strength": -53,
+      "change_pct": -0.531,
+      "turnover": 12455059780,
+      "main_net": -369418374
+    },
+    {
+      "code": "801092",
+      "name": "铅酸电池",
+      "strength": -53,
+      "change_pct": -0.534,
+      "turnover": 3192118751,
+      "main_net": 529395
+    },
+    {
+      "code": "801747",
+      "name": "宁夏回族自治区",
+      "strength": -54,
+      "change_pct": -0.547,
+      "turnover": 3304980454,
+      "main_net": -54721330
+    },
+    {
+      "code": "801546",
+      "name": "钒电池",
+      "strength": -55,
+      "change_pct": -0.551,
+      "turnover": 11560741108,
+      "main_net": -44848666
+    },
+    {
+      "code": "801417",
+      "name": "天津自贸区",
+      "strength": -57,
+      "change_pct": -0.577,
+      "turnover": 1130699268,
+      "main_net": 9566595
+    },
+    {
+      "code": "801752",
+      "name": "广西壮族自治区",
+      "strength": -57,
+      "change_pct": -0.577,
+      "turnover": 9056711583,
+      "main_net": -26981512
+    },
+    {
+      "code": "801742",
+      "name": "内蒙古自治区",
+      "strength": -57,
+      "change_pct": -0.578,
+      "turnover": 10491994649,
+      "main_net": 0
+    },
+    {
+      "code": "801519",
+      "name": "汽车类",
+      "strength": -58,
+      "change_pct": 0.639,
+      "turnover": 334291304345,
+      "main_net": -22545446
+    },
+    {
+      "code": "801040",
+      "name": "造纸",
+      "strength": -59,
+      "change_pct": -0.59,
+      "turnover": 3445450898,
+      "main_net": -40314829
+    },
+    {
+      "code": "801996",
+      "name": "社保卡",
+      "strength": -59,
+      "change_pct": -0.593,
+      "turnover": 1857989803,
+      "main_net": -197115
+    },
+    {
+      "code": "801625",
+      "name": "在线办公",
+      "strength": -60,
+      "change_pct": -0.21,
+      "turnover": 6172481079,
+      "main_net": 3595479
+    },
+    {
+      "code": "801767",
+      "name": "重庆市",
+      "strength": -60,
+      "change_pct": -0.381,
+      "turnover": 14094970710,
+      "main_net": 441404
+    },
+    {
+      "code": "801144",
+      "name": "医美",
+      "strength": -65,
+      "change_pct": -0.553,
+      "turnover": 20434727620,
+      "main_net": 256337691
+    },
+    {
+      "code": "801741",
+      "name": "云南省",
+      "strength": -65,
+      "change_pct": -0.372,
+      "turnover": 12843768345,
+      "main_net": 21716283
+    },
+    {
+      "code": "801973",
+      "name": "保健品",
+      "strength": -68,
+      "change_pct": -0.337,
+      "turnover": 16958700960,
+      "main_net": -1400582
+    },
+    {
+      "code": "801622",
+      "name": "跨境支付",
+      "strength": -68,
+      "change_pct": -0.439,
+      "turnover": 33458514389,
+      "main_net": 359281
+    },
+    {
+      "code": "801606",
+      "name": "成渝经济圈",
+      "strength": -78,
+      "change_pct": -0.789,
+      "turnover": 481066351,
+      "main_net": 231895
+    },
+    {
+      "code": "801391",
+      "name": "美容护理",
+      "strength": -78,
+      "change_pct": -0.574,
+      "turnover": 5596349203,
+      "main_net": 13118698
+    },
+    {
+      "code": "801579",
+      "name": "垃圾发电",
+      "strength": -79,
+      "change_pct": -0.792,
+      "turnover": 2765813951,
+      "main_net": -38902300
+    },
+    {
+      "code": "801200",
+      "name": "互联网医疗",
+      "strength": -79,
+      "change_pct": -0.612,
+      "turnover": 12358489135,
+      "main_net": 3204926
+    },
+    {
+      "code": "801848",
+      "name": "财税数字化",
+      "strength": -80,
+      "change_pct": -0.804,
+      "turnover": 5549652732,
+      "main_net": -5536289
+    },
+    {
+      "code": "801314",
+      "name": "ST板块",
+      "strength": -83,
+      "change_pct": 0.162,
+      "turnover": 8603097003,
+      "main_net": -10683958
+    },
+    {
+      "code": "801371",
+      "name": "垃圾分类",
+      "strength": -89,
+      "change_pct": -0.893,
+      "turnover": 2364684711,
+      "main_net": -44844026
+    },
+    {
+      "code": "801049",
+      "name": "租售同权",
+      "strength": -89,
+      "change_pct": -0.899,
+      "turnover": 3118801401,
+      "main_net": 4154238
+    },
+    {
+      "code": "801047",
+      "name": "钠电池",
+      "strength": -96,
+      "change_pct": -0.884,
+      "turnover": 54339609646,
+      "main_net": -27927098
+    },
+    {
+      "code": "801654",
+      "name": "眼科医疗",
+      "strength": -109,
+      "change_pct": -0.766,
+      "turnover": 11446316157,
+      "main_net": -85398235
+    },
+    {
+      "code": "801662",
+      "name": "火电灵活改造",
+      "strength": -113,
+      "change_pct": -1.139,
+      "turnover": 1758076918,
+      "main_net": -4000733
+    },
+    {
+      "code": "801137",
+      "name": "醋酸",
+      "strength": -115,
+      "change_pct": -1.159,
+      "turnover": 582183796,
+      "main_net": -17384927
+    },
+    {
+      "code": "801956",
+      "name": "卫生护理",
+      "strength": -116,
+      "change_pct": -1.16,
+      "turnover": 1768096835,
+      "main_net": 272099
+    },
+    {
+      "code": "801388",
+      "name": "VPN",
+      "strength": -122,
+      "change_pct": -1.224,
+      "turnover": 5732081131,
+      "main_net": -2424176
+    },
+    {
+      "code": "801220",
+      "name": "食品饮料",
+      "strength": -136,
+      "change_pct": -0.227,
+      "turnover": 39372192546,
+      "main_net": -184523964
+    },
+    {
+      "code": "801074",
+      "name": "核电",
+      "strength": -136,
+      "change_pct": 0.318,
+      "turnover": 101311153199,
+      "main_net": 1358586811
+    },
+    {
+      "code": "801920",
+      "name": "硫化物",
+      "strength": -151,
+      "change_pct": -1.517,
+      "turnover": 14501144179,
+      "main_net": -8331082
+    },
+    {
+      "code": "801468",
+      "name": "电子烟",
+      "strength": -194,
+      "change_pct": 0.26,
+      "turnover": 20005624595,
+      "main_net": -202994362
+    },
+    {
+      "code": "801224",
+      "name": "3D打印",
+      "strength": -230,
+      "change_pct": 0.799,
+      "turnover": 30737353539,
+      "main_net": 45592985
+    },
+    {
+      "code": "801234",
+      "name": "航运",
+      "strength": -251,
+      "change_pct": -0.174,
+      "turnover": 14815873246,
+      "main_net": -33805337
+    },
+    {
+      "code": "801004",
+      "name": "锂电池",
+      "strength": -254,
+      "change_pct": -0.201,
+      "turnover": 212870069595,
+      "main_net": -2630536303
+    },
+    {
+      "code": "801573",
+      "name": "三季报增长",
+      "strength": -441,
+      "change_pct": 0.202,
+      "turnover": 892029089394,
+      "main_net": 73232329
+    },
+    {
+      "code": "801414",
+      "name": "教育",
+      "strength": -452,
+      "change_pct": -0.392,
+      "turnover": 46918940554,
+      "main_net": -84054205
+    },
+    {
+      "code": "801178",
+      "name": "储能",
+      "strength": -518,
+      "change_pct": -0.087,
+      "turnover": 245478095559,
+      "main_net": -1193092455
+    },
+    {
+      "code": "801574",
+      "name": "年报增长",
+      "strength": -863,
+      "change_pct": -8.634,
+      "turnover": 3731514195,
+      "main_net": 0
+    }
+  ],
+  "mood": {}
+}

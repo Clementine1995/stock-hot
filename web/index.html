@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>stock-hot · A股金融热点</title>
+<style>
+  :root {
+    --up: #e03131;
+    --up-name: #c0392b;
+    --down: #0ca678;
+    --down-name: #6b7280;
+    --hl-bg: #fff3bf;
+    --hl-line: #f08c00;
+    --line: #e6e3dc;
+    --bg: #f5f3ef;
+    --card: #ffffff;
+    --text: #2b2a28;
+    --muted: #9a958c;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    font-family: -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+    color: var(--text); background: var(--bg);
+  }
+
+  /* 顶部导航 */
+  header.topbar {
+    background: var(--card); border-bottom: 1px solid var(--line);
+    padding: 10px 20px; position: sticky; top: 0; z-index: 30;
+    display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
+  }
+  .brand { font-size: 16px; font-weight: 800; }
+  .brand .dot { color: var(--up); }
+  .brand .sub { font-size: 12px; font-weight: 400; color: var(--muted); margin-left: 6px; }
+  nav.tabs { display: flex; gap: 4px; }
+  .tab {
+    font: inherit; font-size: 13px; padding: 6px 14px; cursor: pointer;
+    border: 1px solid transparent; border-radius: 7px; background: transparent; color: var(--muted);
+  }
+  .tab.active { background: #fff; border-color: var(--line); color: var(--text); font-weight: 600; box-shadow: 0 1px 2px rgba(0,0,0,.05); }
+  .actions { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+  .status { font-size: 12px; color: var(--muted); }
+  .status.ok { color: var(--down); }
+  .status.err { color: var(--up); }
+  button.refresh {
+    font: inherit; font-size: 13px; padding: 7px 16px; cursor: pointer;
+    background: #f08c00; color: #fff; border: none; border-radius: 7px; font-weight: 600;
+  }
+  button.refresh:disabled { opacity: .6; cursor: default; }
+
+  .tab-panel { display: none; padding: 14px 20px; }
+  .tab-panel.active { display: block; }
+  .empty-tip { padding: 60px 20px; text-align: center; color: var(--muted); font-size: 14px; }
+
+  /* 面板工具条（轮动） */
+  .panel-toolbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+  .panel-toolbar .stats { font-size: 12px; color: var(--muted); }
+  .panel-toolbar .controls { margin-left: auto; display: flex; gap: 8px; }
+  .panel-toolbar input[type=search], .panel-toolbar select {
+    font: inherit; font-size: 12px; padding: 5px 10px;
+    border: 1px solid var(--line); border-radius: 6px; background: #fff; color: var(--text);
+  }
+  .panel-toolbar input[type=search] { width: 150px; }
+  .hint { font-size: 11px; color: var(--muted); }
+
+  /* 日历墙 */
+  main#grid {
+    display: grid;
+    grid-template-columns: repeat(8, minmax(118px, 1fr));
+    gap: 8px; align-items: start;
+  }
+  .card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 8px;
+    overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,.04);
+  }
+  .card-head {
+    padding: 6px 8px; font-weight: 700; font-size: 12px; text-align: center;
+    background: #faf9f6; border-bottom: 1px solid var(--line); letter-spacing: .5px;
+  }
+  .entries { padding: 4px 6px 6px; }
+  .entry {
+    display: flex; align-items: center; gap: 4px;
+    padding: 2px 3px; margin: 1px 0; border-radius: 4px; font-size: 11px;
+    cursor: pointer; border: 1px solid transparent; user-select: none; line-height: 1.35;
+  }
+  .entry .nm { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .entry .val { font-weight: 700; flex-shrink: 0; font-variant-numeric: tabular-nums; }
+  .entry.strong .nm { color: var(--up-name); }
+  .entry.strong .val { color: var(--up); }
+  .entry.weak .nm { color: var(--down-name); }
+  .entry.weak .val { color: var(--down); }
+  .entry.hl { background: var(--hl-bg); border-color: var(--hl-line); }
+  .divider { font-size: 10px; color: var(--muted); margin: 4px 3px 2px; padding-top: 3px; border-top: 1px dashed var(--line); }
+
+  /* 底部详情 + 轨迹 */
+  footer#detail {
+    position: sticky; bottom: 0; background: var(--card);
+    border-top: 2px solid var(--line); padding: 10px 20px 14px; z-index: 30;
+    display: none; gap: 24px; align-items: flex-start; flex-wrap: wrap;
+  }
+  footer#detail.show { display: flex; }
+  #detail-panel { min-width: 180px; }
+  .dp-title { font-size: 15px; font-weight: 700; }
+  .dp-meta { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .dp-meta .u { color: var(--up); font-weight: 700; }
+  .dp-meta .d { color: var(--down); font-weight: 700; }
+  .dp-meta b { color: var(--text); }
+  #timeline { flex: 1; min-width: 260px; }
+  .tl-label { font-size: 11px; color: var(--muted); margin-bottom: 5px; }
+  #tl-cells { display: flex; gap: 3px; overflow-x: auto; padding-bottom: 4px; }
+  .tcell { flex: 0 0 52px; text-align: center; padding: 4px 2px 3px; border-radius: 5px; color: #fff; line-height: 1.25; }
+  .tcell.up { background: var(--up); }
+  .tcell.down { background: var(--down); }
+  .tcell.empty { background: #e5e1d8; color: #a8a198; }
+  .tcell .td { display: block; font-size: 9px; opacity: .92; }
+  .tcell .tv { display: block; font-size: 10px; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+  /* 温度面板 */
+  .mood-card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px 20px; margin-bottom: 14px; }
+  .mood-current { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+  .temp-big { font-size: 60px; font-weight: 800; line-height: 1; }
+  .temp-state { font-size: 18px; font-weight: 700; }
+  .temp-date { font-size: 13px; color: var(--muted); }
+  .thermo-bar { height: 16px; border-radius: 8px; position: relative; margin: 8px 0 4px;
+    background: linear-gradient(to right, #0ca678 0%, #0ca678 40%, #f08c00 60%, #e03131 100%); }
+  .thermo-marker { position: absolute; top: -5px; width: 4px; height: 26px; background: #1f2933; border-radius: 2px; transform: translateX(-50%); }
+  .thermo-scale { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); }
+  .mood-note { font-size: 11px; color: var(--muted); margin-top: 8px; }
+  .mood-card h2 { margin: 0 0 12px; font-size: 14px; color: #4d5967; }
+  .chart-wrap { width: 100%; max-width: 860px; }
+
+  /* 报表 */
+  .report-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+  .r-card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; }
+  .r-card h2 { margin: 0 0 10px; font-size: 14px; color: #4d5967; }
+  .kv { display: flex; justify-content: space-between; padding: 3px 0; font-size: 13px; }
+  .kv .k { color: var(--muted); }
+  .kv .v { font-weight: 600; font-variant-numeric: tabular-nums; }
+  .rank-list { margin: 0; padding: 0; list-style: none; }
+  .rank-list li { display: flex; justify-content: space-between; padding: 3px 0; font-size: 13px; border-bottom: 1px dashed #f0ede6; }
+  .rank-list li:last-child { border-bottom: none; }
+  .rank-list .rnm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .rank-list .rval { font-weight: 600; font-variant-numeric: tabular-nums; }
+  .rank-list.up .rval { color: var(--up); }
+  .rank-list.down .rval { color: var(--down); }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand"><span class="dot">●</span> stock-hot<span class="sub">A股金融热点</span></div>
+  <nav class="tabs">
+    <button class="tab active" data-tab="wheel">题材轮动</button>
+    <button class="tab" data-tab="mood">情绪温度</button>
+    <button class="tab" data-tab="report">数字报表</button>
+  </nav>
+  <div class="actions">
+    <span id="status" class="status">加载中…</span>
+    <button id="refresh" class="refresh">刷新数据</button>
+  </div>
+</header>
+
+<section id="tab-wheel" class="tab-panel active">
+  <div class="panel-toolbar">
+    <span class="stats" id="wheel-stats">—</span>
+    <div class="controls">
+      <input id="search" type="search" placeholder="搜索题材…">
+      <select id="filter">
+        <option value="all">全部</option>
+        <option value="strong">强势</option>
+        <option value="weak">弱势</option>
+      </select>
+    </div>
+  </div>
+  <div class="hint" style="margin-bottom:10px">点击任意题材 → <b>同名题材自动高亮</b>并生成轮动轨迹 · <b style="color:var(--up)">红=走强</b> · <b style="color:var(--down)">绿=走弱</b></div>
+  <main id="grid"><div class="empty-tip">加载中…</div></main>
+</section>
+
+<section id="tab-mood" class="tab-panel"><div class="empty-tip">加载中…</div></section>
+<section id="tab-report" class="tab-panel"><div class="empty-tip">加载中…</div></section>
+
+<footer id="detail">
+  <div id="detail-panel"></div>
+  <div id="timeline"></div>
+</footer>
+
+<script>
+let DATA = null;
+
+function fmt(n) { return (n === undefined || n === null) ? '—' : Number(n).toLocaleString('zh-CN'); }
+function md(date) { return date.slice(5).replace('-', ''); }
+
+/* ---------- 数据加载 ---------- */
+async function loadData() {
+  const res = await fetch('/api/data');
+  DATA = await res.json();
+  renderAll();
+  const s = document.getElementById('status');
+  if (DATA.latest) {
+    s.textContent = '数据截至 ' + DATA.latest.date + ' · ' + DATA.stats.n_days + ' 个交易日';
+    s.className = 'status ok';
+  } else {
+    s.textContent = '暂无数据';
+    s.className = 'status err';
+  }
+}
+
+async function refresh() {
+  const btn = document.getElementById('refresh');
+  const st = document.getElementById('status');
+  btn.disabled = true; btn.textContent = '刷新中…'; st.textContent = '正在采集最新数据…'; st.className = 'status';
+  try {
+    const res = await fetch('/api/refresh', { method: 'POST' });
+    const r = await res.json();
+    if (r.ok) {
+      await loadData();
+    } else {
+      st.textContent = '刷新失败：' + (r.error || '未知错误');
+      st.className = 'status err';
+      btn.disabled = false; btn.textContent = '刷新数据';
+    }
+  } catch (e) {
+    st.textContent = '刷新失败：' + e.message;
+    st.className = 'status err';
+    btn.disabled = false; btn.textContent = '刷新数据';
+  }
+}
+
+/* ---------- Tab 切换 ---------- */
+document.querySelectorAll('.tab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('tab-' + t.dataset.tab).classList.add('active');
+    document.getElementById('detail').classList.remove('show');
+  });
+});
+document.getElementById('refresh').addEventListener('click', refresh);
+
+/* ---------- 渲染总入口 ---------- */
+function renderAll() {
+  renderWheel();
+  renderMood();
+  renderReport();
+}
+
+/* ---------- 题材轮动（日历墙） ---------- */
+function entryEl(item, kind) {
+  const el = document.createElement('div');
+  el.className = 'entry ' + kind;
+  el.dataset.name = item.name;
+  const nm = document.createElement('span'); nm.className = 'nm'; nm.textContent = item.name;
+  const val = document.createElement('span'); val.className = 'val'; val.textContent = fmt(item.strength);
+  el.appendChild(nm); el.appendChild(val);
+  el.addEventListener('click', () => selectPlate(item.name));
+  return el;
+}
+
+function renderWheel() {
+  const grid = document.getElementById('grid');
+  document.getElementById('wheel-stats').textContent = DATA.stats.n_days + ' 个交易日 · ' + DATA.stats.n_records + ' 条记录 · ' + DATA.stats.n_plates + ' 个题材';
+  grid.innerHTML = '';
+  if (!DATA.days.length) { grid.innerHTML = '<div class="empty-tip">暂无数据，点右上角「刷新数据」采集</div>'; return; }
+  DATA.days.forEach(day => {
+    const card = document.createElement('div'); card.className = 'card';
+    const head = document.createElement('div'); head.className = 'card-head'; head.textContent = md(day.date);
+    card.appendChild(head);
+    const entries = document.createElement('div'); entries.className = 'entries';
+    day.strong.forEach(it => entries.appendChild(entryEl(it, 'strong')));
+    if (day.weak.length) {
+      const div = document.createElement('div'); div.className = 'divider'; div.textContent = '弱势题材';
+      entries.appendChild(div);
+    }
+    day.weak.forEach(it => entries.appendChild(entryEl(it, 'weak')));
+    card.appendChild(entries);
+    grid.appendChild(card);
+  });
+  applyFilters();
+}
+
+function applyFilters() {
+  const q = document.getElementById('search').value.trim().toLowerCase();
+  const f = document.getElementById('filter').value;
+  document.querySelectorAll('.entry').forEach(e => {
+    const name = e.dataset.name;
+    const isStrong = e.classList.contains('strong');
+    const matchQ = !q || name.toLowerCase().indexOf(q) >= 0;
+    const matchF = f === 'all' || (f === 'strong' ? isStrong : !isStrong);
+    e.style.display = (matchQ && matchF) ? '' : 'none';
+  });
+  document.querySelectorAll('.card').forEach(c => {
+    const weakV = Array.from(c.querySelectorAll('.entry.weak')).some(e => e.style.display !== 'none');
+    const strongV = Array.from(c.querySelectorAll('.entry.strong')).some(e => e.style.display !== 'none');
+    const div = c.querySelector('.divider');
+    if (div) div.style.display = weakV ? '' : 'none';
+    c.style.display = (weakV || strongV) ? '' : 'none';
+  });
+}
+
+let selectedName = null;
+function selectPlate(name) {
+  selectedName = name;
+  document.querySelectorAll('.entry').forEach(e => e.classList.toggle('hl', e.dataset.name === name));
+  const footer = document.getElementById('detail');
+  footer.classList.add('show');
+  renderDetail(name);
+  renderTimeline(name);
+}
+
+function renderDetail(name) {
+  const panel = document.getElementById('detail-panel');
+  const series = DATA.series[name] || {};
+  const dates = DATA.days.map(d => d.date);
+  let upDays = 0, downDays = 0;
+  for (let i = 0; i < dates.length; i++) { const v = series[dates[i]]; if (v === undefined || v <= 0) break; upDays++; }
+  for (let i = 0; i < dates.length; i++) { const v = series[dates[i]]; if (v === undefined || v >= 0) break; downDays++; }
+  const cur = series[dates[0]];
+  panel.innerHTML = '';
+  const title = document.createElement('div'); title.className = 'dp-title'; title.textContent = name;
+  const meta = document.createElement('div'); meta.className = 'dp-meta';
+  meta.innerHTML = '上涨 <span class="u">' + upDays + '</span> 天 · 回调 <span class="d">' + downDays + '</span> 天 · 当前强度 <b>' + fmt(cur) + '</b>';
+  panel.appendChild(title); panel.appendChild(meta);
+}
+
+function renderTimeline(name) {
+  const tl = document.getElementById('timeline');
+  const series = DATA.series[name] || {};
+  const dates = DATA.days.map(d => d.date);
+  tl.innerHTML = '<div class="tl-label">' + name + ' 轮动轨迹（近 ' + dates.length + ' 个交易日）</div>';
+  const cells = document.createElement('div'); cells.id = 'tl-cells';
+  dates.forEach(d => {
+    const v = series[d];
+    const cell = document.createElement('div');
+    cell.className = 'tcell ' + (v === undefined ? 'empty' : (v > 0 ? 'up' : 'down'));
+    const td = document.createElement('span'); td.className = 'td'; td.textContent = md(d);
+    const tv = document.createElement('span'); tv.className = 'tv'; tv.textContent = fmt(v);
+    cell.appendChild(td); cell.appendChild(tv);
+    cells.appendChild(cell);
+  });
+  tl.appendChild(cells);
+}
+
+document.getElementById('search').addEventListener('input', applyFilters);
+document.getElementById('filter').addEventListener('change', applyFilters);
+
+/* ---------- 情绪温度 ---------- */
+function tempColor(t) {
+  if (t === null || t === undefined) return '#9aa3ad';
+  if (t <= 40) return '#0ca678';
+  if (t >= 60) return '#e03131';
+  return '#f08c00';
+}
+function tempState(t) {
+  if (t === null || t === undefined) return '数据缺失';
+  if (t <= 40) return '冰点 · 低温';
+  if (t >= 60) return '高温 · 亢奋';
+  return '中性 · 震荡';
+}
+
+function lineChartSVG(series) {
+  const width = 640, height = 250, left = 56, right = 618, top = 20, bottom = 208;
+  const n = series.length;
+  const parts = [];
+  [0, 20, 40, 60, 80, 100].forEach(tick => {
+    const y = bottom - (tick / 100) * (bottom - top);
+    parts.push('<line x1="' + left + '" y1="' + y.toFixed(1) + '" x2="' + right + '" y2="' + y.toFixed(1) + '" stroke="#eceef1"/>');
+    parts.push('<text x="' + (left - 8) + '" y="' + (y + 4).toFixed(1) + '" text-anchor="end" font-size="10" fill="#7b8794">' + tick + '</text>');
+  });
+  const pts = [];
+  series.forEach((item, i) => {
+    if (item.temperature === null || item.temperature === undefined) return;
+    const x = left + (right - left) * (n > 1 ? i / (n - 1) : 0.5);
+    const y = bottom - (item.temperature / 100) * (bottom - top);
+    pts.push({ x, y, t: item.temperature, d: item.date });
+  });
+  if (!pts.length) {
+    parts.push('<text x="' + ((left + right) / 2) + '" y="' + (top + 60) + '" text-anchor="middle" font-size="13" fill="#9aa3ad">暂无有效温度数据</text>');
+  }
+  if (pts.length >= 2) {
+    parts.push('<polyline points="' + pts.map(p => p.x.toFixed(1) + ',' + p.y.toFixed(1)).join(' ') + '" fill="none" stroke="#4d5967" stroke-width="2"/>');
+  }
+  pts.forEach(p => {
+    parts.push('<circle cx="' + p.x.toFixed(1) + '" cy="' + p.y.toFixed(1) + '" r="4" fill="' + tempColor(p.t) + '"/>');
+    parts.push('<text x="' + p.x.toFixed(1) + '" y="' + (bottom + 20) + '" text-anchor="middle" font-size="10" fill="#7b8794">' + md(p.d) + '</text>');
+  });
+  return '<svg viewBox="0 0 ' + width + ' ' + height + '" xmlns="http://www.w3.org/2000/svg" style="width:100%">' + parts.join('') + '</svg>';
+}
+
+function renderMood() {
+  const sec = document.getElementById('tab-mood');
+  const cur = DATA.latest;
+  const series = DATA.mood_series || [];
+  const temp = cur ? cur.temperature : null;
+  const color = tempColor(temp);
+  const markerLeft = (temp !== null && temp !== undefined) ? temp : 0;
+  const hasHist = series.filter(s => s.temperature !== null && s.temperature !== undefined).length;
+  sec.innerHTML =
+    '<div class="mood-card"><div class="mood-current">' +
+    '<div class="temp-big" style="color:' + color + '">' + fmt(temp) + '</div>' +
+    '<div><div class="temp-state" style="color:' + color + '">' + tempState(temp) + '</div>' +
+    '<div class="temp-date">' + (cur ? cur.date : '—') + '</div></div></div>' +
+    '<div style="margin-top:16px"><div class="thermo-bar"><div class="thermo-marker" style="left:' + markerLeft + '%"></div></div>' +
+    '<div class="thermo-scale"><span>0 冰点</span><span>50 中性</span><span>100 高温</span></div></div>' +
+    '<div class="mood-note">温度由涨跌家数 + 涨停/跌停家数自算；历史温度需每日点「刷新数据」累积（接口不支持情绪历史回查）。当前有效历史点：' + hasHist + ' 个。</div>' +
+    '</div>' +
+    '<div class="mood-card"><h2>近 N 日温度曲线</h2><div class="chart-wrap">' + lineChartSVG(series) + '</div></div>';
+}
+
+/* ---------- 数字报表 ---------- */
+function renderReport() {
+  const sec = document.getElementById('tab-report');
+  if (!DATA.latest) { sec.innerHTML = '<div class="empty-tip">暂无数据</div>'; return; }
+  const L = DATA.latest;
+  const mood = L.mood || {};
+  const up = DATA.days.length ? '<div class="r-card"><h2>市场情绪（' + L.date + '）</h2>' +
+    '<div class="kv"><span class="k">情绪温度</span><span class="v">' + fmt(L.temperature) + '</span></div>' +
+    '<div class="kv"><span class="k">上涨家数</span><span class="v">' + fmt(mood.up_count) + '</span></div>' +
+    '<div class="kv"><span class="k">下跌家数</span><span class="v">' + fmt(mood.down_count) + '</span></div>' +
+    '<div class="kv"><span class="k">涨停家数</span><span class="v">' + fmt(mood.limit_up) + '</span></div>' +
+    '<div class="kv"><span class="k">跌停家数</span><span class="v">' + fmt(mood.limit_down) + '</span></div>' +
+    '</div>' : '';
+  const strongList = '<div class="r-card"><h2>板块强度 Top10（走强）</h2><ul class="rank-list up">' +
+    (L.strong_top10 || []).map((p, i) => '<li><span class="rnm">' + (i + 1) + '. ' + p.name + '</span><span class="rval">' + fmt(p.strength) + '</span></li>').join('') +
+    '</ul></div>';
+  const weakList = '<div class="r-card"><h2>板块强度 Bottom10（走弱）</h2><ul class="rank-list down">' +
+    (L.weak_top10 || []).map((p, i) => '<li><span class="rnm">' + (i + 1) + '. ' + p.name + '</span><span class="rval">' + fmt(p.strength) + '</span></li>').join('') +
+    '</ul></div>';
+  sec.innerHTML = '<div class="report-grid">' + up + strongList + weakList + '</div>';
+}
+
+loadData();
+</script>
+</body>
+</html>
