@@ -92,7 +92,7 @@
 2. **数据量大了或要跨日聚合/关联**：迁 SQLite，只改 `storage/store.py` 内部实现，上层不动。
 3. **DeepSeek 点评**：接入时记得走 AGENTS.md 红线——付费调用先记回执 + 预算熔断 + 开关显式 `true` 才开。
 
-## 七、环境事实（本机，另一台可能不同）
+## 七、环境事实（本机：home 机器；另一台 work 机器路径不同）
 
-- 双 Python 并存：`python` → WorkBuddy 内置 3.13.12；系统 `C:\Program Files\Python313`。项目零依赖，两环境皆可跑，验证时用系统 Python。
-- 项目路径本机为 `F:\codex-project\stock-hot`；另一台电脑 clone 后路径不同，代码内用相对路径（`Path(__file__)` 推导），不依赖绝对路径。
+- 双 Python 并存：`python` → WorkBuddy 内置（`C:\Users\hyc\.workbuddy\binaries\python\...\python.exe`，运行时 3.13.14）；系统 `C:\Program Files\Python313\python.exe`（3.13.13）。项目零依赖，两环境皆可跑，验证时用系统 Python。
+- 项目路径本机为 `E:\workspace\stock-hot`（home 机器）；另一台 work 机器 clone 后路径不同（早前记录为 `F:\codex-project\stock-hot`），代码内用相对路径（`Path(__file__)` 推导），不依赖绝对路径。
