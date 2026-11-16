@@ -11,30 +11,42 @@ from datetime import datetime, timedelta, timezone
 
 from src.collectors.kaipanla import KaipanlaCollector
 from src.indicators.mood import mood_temperature
+from src.indicators.stocks import collect_strong_stocks
 from src.render.mood import build_mood_series, save_mood
 from src.render.report import save_report
 from src.render.wheel import build_panel_data, save_wheel
-from src.storage.store import load_all_snapshots, save_snapshot
+from src.storage.store import load_all_snapshots, save_snapshot, save_stocks
 
 _SHANGHAI_TZ = timezone(timedelta(hours=8))
 
 
 def main() -> int:
+    collector = KaipanlaCollector()
     if len(sys.argv) > 1:
         date = sys.argv[1]
+        plates = collector.fetch_plate_ranking(date)
     else:
-        date = datetime.now(_SHANGHAI_TZ).strftime("%Y-%m-%d")
+        date, plates = collector.fetch_latest_plate_ranking()
+        if not date:
+            date = datetime.now(_SHANGHAI_TZ).strftime("%Y-%m-%d")
 
     print(f"[1/4] 采集 {date} ...")
-    collector = KaipanlaCollector()
-    plates = collector.fetch_plate_ranking(date)
     if not plates:
         print(f"错误：{date} 无板块数据（非交易日或数据未更新）。")
         print("      请指定交易日，例如：python run.py 2026-11-13")
         return 1
-    mood = collector.fetch_market_mood()
+    mood = collector.fetch_mood_for(date)
     save_snapshot(date, plates, mood)
     print(f"      板块 {len(plates)} 个")
+    stocks = collect_strong_stocks(collector, date, plates)
+    if stocks:
+        save_stocks(date, stocks)
+        print(f"      成分股 {len(stocks)} 只")
+
+    if not mood:
+        print("      历史回补：情绪不可回查，跳过温度/情绪报表")
+        print("完成（仅采集板块强度 + 成分股）。")
+        return 0
 
     print("[2/4] 计算情绪温度 ...")
     temperature = mood_temperature(

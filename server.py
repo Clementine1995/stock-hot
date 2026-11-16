@@ -20,9 +20,10 @@ from urllib.parse import urlparse, parse_qs
 
 from src.collectors.kaipanla import KaipanlaCollector
 from src.indicators.mood import mood_temperature
+from src.indicators.stocks import collect_strong_stocks, pick_generals, pick_leaders
 from src.render.mood import build_mood_series
 from src.render.wheel import build_panel_data
-from src.storage.store import load_all_snapshots, save_snapshot
+from src.storage.store import load_all_snapshots, load_all_stocks, save_snapshot, save_stocks
 
 _SHANGHAI_TZ = timezone(timedelta(hours=8))
 _WEB_DIR = Path(__file__).resolve().parent / "web"
@@ -73,11 +74,47 @@ def build_web_data() -> dict:
         "mood_series": mood_series,
         "stats": {"n_days": len(days), "n_records": records, "n_plates": len(series)},
         "latest": latest,
+        "stock_pool": build_stock_pool(),
     }
 
 
+def build_stock_pool() -> dict:
+    """从最新成分股快照构建票池：每个板块的领涨票 top5 + 中军 top5。"""
+    snapshots = load_all_stocks()
+    if not snapshots:
+        return None
+    latest = max(snapshots, key=lambda s: s["date"])
+    stocks = latest["stocks"]
+
+    by_plate: dict[str, list] = {}
+    for stock in stocks:
+        for plate in stock.get("plates") or []:
+            by_plate.setdefault(plate, []).append(stock)
+
+    pool = []
+    for plate_name, plate_stocks in by_plate.items():
+        pool.append({
+            "name": plate_name,
+            "leaders": pick_leaders(plate_stocks),
+            "generals": pick_generals(plate_stocks),
+        })
+
+    def plate_turnover(item):
+        return sum((g.get("turnover") or 0) for g in item["generals"])
+
+    pool.sort(key=plate_turnover, reverse=True)
+    return {"date": latest["date"], "plates": pool}
+
+
 def find_latest_trading_day(collector: KaipanlaCollector, start):
-    """从 start 往前逐日找最近一个「有数据」的交易日，返回 (date, plates)。"""
+    """找最近一个「有数据」的交易日，返回 (date, plates)。
+
+    优先用当日域拿最新交易日（当天数据在历史域未归档）；
+    当日域不可用时回退到历史域逐日回退。
+    """
+    day_str, plates = collector.fetch_latest_plate_ranking()
+    if day_str and plates:
+        return datetime.strptime(day_str, "%Y-%m-%d").date(), plates
     day = start
     for _ in range(15):  # 最多回退 15 个自然日，覆盖节假日
         plates = collector.fetch_plate_ranking(day.strftime("%Y-%m-%d"))
@@ -127,9 +164,12 @@ class Handler(BaseHTTPRequestHandler):
                 self._send_json({"ok": False, "error": "未找到可采集的交易日"}, 200)
                 return
             ds = day.strftime("%Y-%m-%d")
-            mood = collector.fetch_market_mood()
+            mood = collector.fetch_mood_for(ds)
             save_snapshot(ds, plates, mood)
-            self._send_json({"ok": True, "date": ds, "n_plates": len(plates)})
+            stocks = collect_strong_stocks(collector, ds, plates)
+            if stocks:
+                save_stocks(ds, stocks)
+            self._send_json({"ok": True, "date": ds, "n_plates": len(plates), "n_stocks": len(stocks)})
         except Exception as exc:  # noqa: BLE001 —— 采集异常需如实返回前端
             self._send_json({"ok": False, "error": str(exc)}, 500)
 

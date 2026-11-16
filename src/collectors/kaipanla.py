@@ -13,8 +13,12 @@ import json
 import urllib.parse
 import urllib.request
 import uuid
+from datetime import datetime, timedelta, timezone
 
 from .base import Collector
+
+# 北京时间（Asia/Shanghai 无夏令时，恒为 UTC+8）
+_SHANGHAI_TZ = timezone(timedelta(hours=8))
 
 _HIS_HOST = "https://apphis.longhuvip.com/w1/api/index.php"
 _HQ_HOST = "https://apphwhq.longhuvip.com/w1/api/index.php"
@@ -42,6 +46,25 @@ _MOOD_DOWN = "XDJS"    # 下跌家数
 _MOOD_LIMIT_UP = "ZTJS"    # 涨停家数
 _MOOD_LIMIT_DOWN = "DTJS"  # 跌停家数
 _MOOD_BL = "bl"        # 涨跌比（口径待确认）
+
+# ZhiShuStockList_W8 返回 list[][] 的字段下标（成分股，见 REQ-002 §5.2）
+_STOCK_CODE = 0        # 股票代码
+_STOCK_NAME = 1        # 股票名称
+_STOCK_TAGS = 4        # 细分板块标签（如「光模块、光通信」）
+_STOCK_PRICE = 5       # 价格
+_STOCK_CHANGE_PCT = 6  # 当日涨幅 %
+_STOCK_TURNOVER = 7    # 成交额（元）
+_STOCK_MAIN_NET = 13   # 主力净额（元）
+_STOCK_RANGE_CHG = 20  # 区间涨幅
+_STOCK_BOARD = 23      # 几天几板（「首板」/「3连板」，空=无连板）
+_STOCK_TOTAL_MV = 37   # 总市值（元）
+_STOCK_FLOAT_MV = 38   # 流通市值（元）
+_STOCK_LEAD_COUNT = 40 # 领涨次数
+
+
+def _row_get(row: list, index: int):
+    """安全读取 list 下标，越界返回 None。"""
+    return row[index] if index < len(row) else None
 
 
 class KaipanlaCollector(Collector):
@@ -79,11 +102,27 @@ class KaipanlaCollector(Collector):
         return json.loads(raw)
 
     def fetch_plate_ranking(self, date: str) -> list[dict]:
+        """拉取指定交易日板块强度排名（历史域 apphis，Date 回查）。"""
+        _, plates = self._fetch_plate_ranking(_HIS_HOST, date)
+        return plates
+
+    def fetch_latest_plate_ranking(self) -> tuple:
+        """拉取最新交易日板块强度排名（当日域 apphwhq），返回 (日期, 板块列表)。
+
+        历史域当天数据未归档（errcode=1020），最新数据须走当日域；
+        该域忽略 Date、恒返回最新，返回的 Day 字段标注实际交易日。
+        """
+        today = datetime.now(_SHANGHAI_TZ).strftime("%Y-%m-%d")
+        return self._fetch_plate_ranking(_HQ_HOST, today)
+
+    def _fetch_plate_ranking(self, host: str, date: str) -> tuple:
+        """分页拉取板块强度排名，返回 (实际交易日, 板块列表)。"""
         plates: list[dict] = []
         seen: set[str] = set()
+        day = None
         index = 0
         while True:
-            payload = self._post(_HIS_HOST, {
+            payload = self._post(host, {
                 "Order": "1",
                 "a": "RealRankingInfo",
                 "st": str(_PAGE_SIZE),
@@ -95,10 +134,12 @@ class KaipanlaCollector(Collector):
             })
             errcode = str(payload.get("errcode"))
             if errcode == "1020":
-                # 1020 = 非交易日或数据未更新（见调研 CHANGELOG），返回已收集结果
+                # 1020 = 非交易日或数据未更新，返回已收集结果
                 break
             if errcode != "0":
                 raise RuntimeError(f"RealRankingInfo 接口返回错误: errcode={errcode}")
+            if day is None:
+                day = (payload.get("Day") or [None])[0]
             rows = payload.get("list") or []
             if not rows:
                 break
@@ -121,7 +162,7 @@ class KaipanlaCollector(Collector):
                 # 整页重复说明翻页越界，停止，避免死循环
                 break
             index += _PAGE_SIZE
-        return plates
+        return day, plates
 
     def fetch_market_mood(self) -> dict:
         payload = self._post(_HQ_HOST, {
@@ -140,3 +181,54 @@ class KaipanlaCollector(Collector):
             "limit_down": mood.get(_MOOD_LIMIT_DOWN),
             "bl": mood.get(_MOOD_BL),
         }
+
+    def fetch_mood_for(self, date: str) -> dict:
+        """拉取指定交易日市场情绪；情绪接口仅支持最新交易日。
+
+        date 为最新交易日时返回当日情绪，历史日期返回空 dict，
+        避免把「最新情绪」误写入历史快照（历史情绪接口不可回查）。
+        """
+        latest_date, _ = self.fetch_latest_plate_ranking()
+        if latest_date == date:
+            return self.fetch_market_mood()
+        return {}
+
+    def fetch_plate_stocks(self, plate_id: str, date: str) -> list[dict]:
+        """拉取指定板块在指定交易日的完整成分股列表。
+
+        ZhiShuStockList_W8 的 Type=22 返回完整成分股（非 top9），
+        域名必须是历史域 apphis（当日期域返回空），字段映射见 REQ-002 §5.2。
+        """
+        payload = self._post(_HIS_HOST, {
+            "a": "ZhiShuStockList_W8",
+            "c": "ZhiShuRanking",
+            "PlateID": plate_id,
+            "Date": date,
+            "Type": "22",
+        })
+        errcode = str(payload.get("errcode"))
+        if errcode == "1020":
+            # 非交易日或数据未更新，返回空列表
+            return []
+        if errcode != "0":
+            raise RuntimeError(
+                f"ZhiShuStockList_W8 接口返回错误: errcode={errcode}"
+            )
+        rows = payload.get("list") or []
+        stocks = []
+        for row in rows:
+            stocks.append({
+                "code": _row_get(row, _STOCK_CODE),
+                "name": _row_get(row, _STOCK_NAME),
+                "tags": _row_get(row, _STOCK_TAGS),
+                "price": _row_get(row, _STOCK_PRICE),
+                "change_pct": _row_get(row, _STOCK_CHANGE_PCT),
+                "turnover": _row_get(row, _STOCK_TURNOVER),
+                "main_net": _row_get(row, _STOCK_MAIN_NET),
+                "range_chg": _row_get(row, _STOCK_RANGE_CHG),
+                "board": _row_get(row, _STOCK_BOARD),
+                "total_mv": _row_get(row, _STOCK_TOTAL_MV),
+                "float_mv": _row_get(row, _STOCK_FLOAT_MV),
+                "lead_count": _row_get(row, _STOCK_LEAD_COUNT),
+            })
+        return stocks

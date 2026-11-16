@@ -6,6 +6,9 @@ __pycache__/
 # 运行时派生产物（可由 render_*.py / run.py 重新生成）
 output/
 
+# 成分股快照（ZhiShuStockList_W8 支持历史回查，可再生，不入库）
+data/stocks-*.json
+
 # 本机工作记忆（不跨机提交）
 .workbuddy/
 

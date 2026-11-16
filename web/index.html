@@ -145,6 +145,25 @@
   .rank-list .rval { font-weight: 600; font-variant-numeric: tabular-nums; }
   .rank-list.up .rval { color: var(--up); }
   .rank-list.down .rval { color: var(--down); }
+
+  /* 票池 */
+  .pool-note { font-size: 12px; color: var(--muted); margin-bottom: 12px; }
+  .pool-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
+  .pool-card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; }
+  .pool-head { font-size: 15px; font-weight: 700; padding-bottom: 8px; margin-bottom: 8px; border-bottom: 1px solid var(--line); display: flex; align-items: baseline; gap: 8px; }
+  .pool-head .cnt { font-size: 12px; color: var(--muted); font-weight: 400; }
+  .pool-sec { margin-bottom: 10px; }
+  .pool-sec:last-child { margin-bottom: 0; }
+  .pool-sec-title { font-size: 12px; font-weight: 700; margin-bottom: 4px; }
+  .pool-sec-title.lead { color: var(--up); }
+  .pool-sec-title.gen { color: #1c7ed6; }
+  .pool-stock { display: flex; align-items: center; gap: 6px; padding: 3px 0; font-size: 13px; }
+  .pool-stock .scode { color: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; flex-shrink: 0; }
+  .pool-stock .sname { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .pool-stock .stag { font-size: 10px; color: #fff; background: var(--up); border-radius: 4px; padding: 1px 5px; flex-shrink: 0; }
+  .pool-stock .sval { font-weight: 600; font-variant-numeric: tabular-nums; flex-shrink: 0; }
+  .pool-stock .sval.up { color: var(--up); }
+  .pool-stock .sval.down { color: var(--down); }
 </style>
 </head>
 <body>
@@ -154,6 +173,7 @@
     <button class="tab active" data-tab="wheel">题材轮动</button>
     <button class="tab" data-tab="mood">情绪温度</button>
     <button class="tab" data-tab="report">数字报表</button>
+    <button class="tab" data-tab="stock">核心票池</button>
   </nav>
   <div class="actions">
     <span id="status" class="status">加载中…</span>
@@ -179,6 +199,7 @@
 
 <section id="tab-mood" class="tab-panel"><div class="empty-tip">加载中…</div></section>
 <section id="tab-report" class="tab-panel"><div class="empty-tip">加载中…</div></section>
+<section id="tab-stock" class="tab-panel"><div class="empty-tip">加载中…</div></section>
 
 <footer id="detail">
   <div id="detail-panel"></div>
@@ -215,14 +236,18 @@ async function refresh() {
     const r = await res.json();
     if (r.ok) {
       await loadData();
+      let msg = '已更新至 ' + r.date + '（' + r.n_plates + ' 板块）';
+      if (!r.n_stocks) msg += '；成分股当日未归档，票池保持旧数据';
+      st.textContent = msg;
+      st.className = 'status';
     } else {
       st.textContent = '刷新失败：' + (r.error || '未知错误');
       st.className = 'status err';
-      btn.disabled = false; btn.textContent = '刷新数据';
     }
   } catch (e) {
     st.textContent = '刷新失败：' + e.message;
     st.className = 'status err';
+  } finally {
     btn.disabled = false; btn.textContent = '刷新数据';
   }
 }
@@ -244,6 +269,7 @@ function renderAll() {
   renderWheel();
   renderMood();
   renderReport();
+  renderStockPool();
 }
 
 /* ---------- 题材轮动（日历墙） ---------- */
@@ -428,6 +454,49 @@ function renderReport() {
     (L.weak_top10 || []).map((p, i) => '<li><span class="rnm">' + (i + 1) + '. ' + p.name + '</span><span class="rval">' + fmt(p.strength) + '</span></li>').join('') +
     '</ul></div>';
   sec.innerHTML = '<div class="report-grid">' + up + strongList + weakList + '</div>';
+}
+
+function fmtAmt(n) {
+  if (n === undefined || n === null) return '—';
+  const v = Number(n);
+  if (Math.abs(v) >= 1e8) return (v / 1e8).toFixed(2) + '亿';
+  if (Math.abs(v) >= 1e4) return (v / 1e4).toFixed(1) + '万';
+  return String(v);
+}
+
+function renderStockPool() {
+  const sec = document.getElementById('tab-stock');
+  const pool = DATA.stock_pool;
+  if (!pool || !pool.plates || !pool.plates.length) {
+    sec.innerHTML = '<div class="empty-tip">暂无成分股数据，点右上角「刷新数据」采集</div>';
+    return;
+  }
+  let html = '<div class="pool-note">数据截至 ' + pool.date + ' · ' + pool.plates.length + ' 个走强板块 · 每板块领涨/中军各 top5</div>';
+  html += '<div class="pool-grid">';
+  pool.plates.forEach(function (p) {
+    html += '<div class="pool-card"><div class="pool-head">' + p.name +
+      '<span class="cnt">' + (p.leaders.length + p.generals.length) + ' 只</span></div>';
+    html += '<div class="pool-sec"><div class="pool-sec-title lead">领涨</div>';
+    p.leaders.forEach(function (s) {
+      const c = Number(s.change_pct) || 0;
+      const cls = c > 0 ? 'up' : (c < 0 ? 'down' : '');
+      const board = s.board ? '<span class="stag">' + s.board + '</span>' : '';
+      html += '<div class="pool-stock"><span class="scode">' + s.code + '</span>' +
+        '<span class="sname">' + s.name + '</span>' + board +
+        '<span class="sval ' + cls + '">' + (c > 0 ? '+' : '') + c + '%</span></div>';
+    });
+    html += '</div>';
+    html += '<div class="pool-sec"><div class="pool-sec-title gen">中军</div>';
+    p.generals.forEach(function (s) {
+      html += '<div class="pool-stock"><span class="scode">' + s.code + '</span>' +
+        '<span class="sname">' + s.name + '</span>' +
+        '<span class="sval">' + fmtAmt(s.turnover) + '</span></div>';
+    });
+    html += '</div>';
+    html += '</div>';
+  });
+  html += '</div>';
+  sec.innerHTML = html;
 }
 
 loadData();
