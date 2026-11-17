@@ -141,6 +141,23 @@ def find_latest_trading_day(collector: KaipanlaCollector, start):
     return None, None
 
 
+def collect_stocks_archived(collector, start_date_str, plates):
+    """采集核心票成分股，当天历史域未归档时回退到最近归档日。
+
+    成分股接口 ZhiShuStockList_W8 只在历史域归档 T-1 及更早数据，
+    当天返回 errcode=1020（fetch_plate_stocks 已转成空列表）。
+    返回 (实际归档日, 成分股列表)；全部失败返回 (start_date_str, [])。
+    """
+    day = datetime.strptime(start_date_str, "%Y-%m-%d").date()
+    for _ in range(10):  # 最多回退 10 个自然日，覆盖长假
+        date_str = day.strftime("%Y-%m-%d")
+        stocks = collect_strong_stocks(collector, date_str, plates)
+        if stocks:
+            return date_str, stocks
+        day -= timedelta(days=1)
+    return start_date_str, []
+
+
 class Handler(BaseHTTPRequestHandler):
     def _send(self, status: int, ctype: str, body: bytes):
         self.send_response(status)
@@ -187,16 +204,28 @@ class Handler(BaseHTTPRequestHandler):
         if not code:
             self._send_json({"ok": False, "error": "缺少 code 参数"}, 400)
             return
-        # 未指定日期时，用数据目录里最新交易日
+        # 未指定日期时，优先用最近已归档的成分股快照日期；无则退回最新板块快照日期
         if not date:
-            snapshots = load_all_snapshots()
-            if not snapshots:
-                self._send_json({"ok": False, "error": "暂无快照数据"}, 200)
-                return
-            date = max(snapshots, key=lambda s: s["date"])["date"]
+            stocks_snaps = load_all_stocks()
+            if stocks_snaps:
+                date = max(stocks_snaps, key=lambda s: s["date"])["date"]
+            else:
+                snapshots = load_all_snapshots()
+                if not snapshots:
+                    self._send_json({"ok": False, "error": "暂无快照数据"}, 200)
+                    return
+                date = max(snapshots, key=lambda s: s["date"])["date"]
         collector = KaipanlaCollector()
         try:
             stocks = collector.fetch_plate_stocks(code, date)
+            # 当天成分股未归档（errcode=1020 → 空列表），往前回退到最近归档日
+            day = datetime.strptime(date, "%Y-%m-%d").date()
+            for _ in range(10):
+                if stocks:
+                    break
+                day -= timedelta(days=1)
+                date = day.strftime("%Y-%m-%d")
+                stocks = collector.fetch_plate_stocks(code, date)
             leaders = pick_leaders(stocks)
             generals = pick_generals(stocks)
             self._send_json({
@@ -241,9 +270,10 @@ class Handler(BaseHTTPRequestHandler):
             ds = day.strftime("%Y-%m-%d")
             mood = collector.fetch_mood_for(ds)
             save_snapshot(ds, plates, mood)
-            stocks = collect_strong_stocks(collector, ds, plates)
+            # 成分股：历史域当天未归档（errcode=1020），回退到最近归档日
+            stock_date, stocks = collect_stocks_archived(collector, ds, plates)
             if stocks:
-                save_stocks(ds, stocks)
+                save_stocks(stock_date, stocks)
             self._send_json({"ok": True, "date": ds, "n_plates": len(plates), "n_stocks": len(stocks)})
         except Exception as exc:  # noqa: BLE001 —— 采集异常需如实返回前端
             self._send_json({"ok": False, "error": str(exc)}, 500)
