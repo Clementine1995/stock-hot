@@ -19,8 +19,10 @@ from pathlib import Path
 from urllib.parse import urlparse, parse_qs
 
 from src.collectors.kaipanla import KaipanlaCollector
+from src.indicators.frequency import count_strong_rank_days
 from src.indicators.mood import mood_temperature
 from src.indicators.stocks import collect_strong_stocks, pick_generals, pick_leaders
+from src.llm.review import generate_review, load_review
 from src.render.mood import build_mood_series
 from src.render.wheel import build_panel_data
 from src.storage.store import load_all_snapshots, load_all_stocks, save_snapshot, save_stocks
@@ -32,6 +34,14 @@ _INDEX_PATH = _WEB_DIR / "index.html"
 
 def _load_index() -> str:
     return _INDEX_PATH.read_text(encoding="utf-8")
+
+
+def _rank_plates(plates, key, reverse=True, n=10):
+    """按某字段给板块排序取前 n（忽略缺失值）。"""
+    return sorted(
+        (p for p in plates if p.get(key) is not None),
+        key=lambda p: p[key], reverse=reverse,
+    )[:n]
 
 
 def build_web_data() -> dict:
@@ -66,6 +76,12 @@ def build_web_data() -> dict:
             "mood": mood,
             "strong_top10": strong,
             "weak_top10": weak,
+            # 板块多维榜单（当日市场全景）
+            "change_top10": _rank_plates(plates, "change_pct", True),      # 涨幅榜
+            "change_bottom10": _rank_plates(plates, "change_pct", False),  # 跌幅榜
+            "main_net_top10": _rank_plates(plates, "main_net", True),      # 主力净流入榜
+            "main_net_bottom10": _rank_plates(plates, "main_net", False),  # 主力净流出榜
+            "turnover_top10": _rank_plates(plates, "turnover", True),      # 成交额榜
         }
 
     return {
@@ -75,6 +91,7 @@ def build_web_data() -> dict:
         "stats": {"n_days": len(days), "n_records": records, "n_plates": len(series)},
         "latest": latest,
         "stock_pool": build_stock_pool(),
+        "plate_frequency": count_strong_rank_days(snapshots, window=10, top_n=15),
     }
 
 
@@ -142,11 +159,69 @@ class Handler(BaseHTTPRequestHandler):
             self._send(200, "text/html; charset=utf-8", _load_index().encode("utf-8"))
         elif parsed.path == "/api/data":
             self._send_json(build_web_data())
+        elif parsed.path == "/api/plate_stocks":
+            self._handle_plate_stocks(parsed)
+        elif parsed.path == "/api/review":
+            self._handle_review_get()
         else:
             self._send_json({"error": "not found"}, 404)
 
+    def _handle_review_get(self):
+        """读取最新交易日的点评缓存（不产生付费调用）。"""
+        snapshots = load_all_snapshots()
+        if not snapshots:
+            self._send_json({"ok": False, "review": None})
+            return
+        date = max(snapshots, key=lambda s: s["date"])["date"]
+        cached = load_review(date)
+        if cached:
+            self._send_json({"ok": True, "date": date, "review": cached.get("review"), "cached": True})
+        else:
+            self._send_json({"ok": False, "date": date, "review": None})
+
+    def _handle_plate_stocks(self, parsed):
+        """按需拉取指定板块的核心票（领涨 top5 + 中军 top5）。"""
+        qs = parse_qs(parsed.query)
+        code = qs.get("code", [None])[0]
+        date = qs.get("date", [None])[0]
+        if not code:
+            self._send_json({"ok": False, "error": "缺少 code 参数"}, 400)
+            return
+        # 未指定日期时，用数据目录里最新交易日
+        if not date:
+            snapshots = load_all_snapshots()
+            if not snapshots:
+                self._send_json({"ok": False, "error": "暂无快照数据"}, 200)
+                return
+            date = max(snapshots, key=lambda s: s["date"])["date"]
+        collector = KaipanlaCollector()
+        try:
+            stocks = collector.fetch_plate_stocks(code, date)
+            leaders = pick_leaders(stocks)
+            generals = pick_generals(stocks)
+            self._send_json({
+                "ok": True,
+                "date": date,
+                "n_stocks": len(stocks),
+                "leaders": leaders,
+                "generals": generals,
+            })
+        except Exception as exc:  # noqa: BLE001
+            self._send_json({"ok": False, "error": str(exc)}, 500)
+
+    def _handle_review_post(self, parsed):
+        """生成当日点评（手动触发，付费调用）。"""
+        qs = parse_qs(parsed.query)
+        force = qs.get("force", ["0"])[0] in ("1", "true", "True")
+        snapshots = load_all_snapshots()
+        result = generate_review(snapshots, force=force)
+        self._send_json(result)
+
     def do_POST(self):
         parsed = urlparse(self.path)
+        if parsed.path == "/api/review":
+            self._handle_review_post(parsed)
+            return
         if parsed.path != "/api/refresh":
             self._send_json({"error": "not found"}, 404)
             return
