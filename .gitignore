@@ -6,8 +6,9 @@ __pycache__/
 # 运行时派生产物（可由 render_*.py / run.py 重新生成）
 output/
 
-# 成分股快照（ZhiShuStockList_W8 支持历史回查，可再生，不入库）
-data/stocks-*.json
+# 数据快照（板块强度 + 情绪，均支持历史回查，可再生，不入库）
+# 另一台电脑 clone 后运行 `python backfill.py 30` 即可重拉
+data/
 
 # 本机工作记忆（不跨机提交）
 .workbuddy/

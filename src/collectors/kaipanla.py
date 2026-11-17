@@ -193,6 +193,44 @@ class KaipanlaCollector(Collector):
             return self.fetch_market_mood()
         return {}
 
+    def fetch_mood_history(self, date: str) -> dict:
+        """拉取指定交易日全市场情绪（支持历史回查）。
+
+        HisZhangFuDetail（c=HisHomeDingPan）带 Day 参数、历史域 apphis，
+        返回 info 字典含全市场上涨/下跌家数与涨停/跌停家数，口径与
+        MoodNumCount 一致（SZJS/XDJS/ZTJS/DTJS 对应 SZJS/XDJS/SJZT/SJDT）。
+
+        非交易日（errcode=1020）返回空 dict。
+        """
+        payload = self._post(_HIS_HOST, {
+            "a": "HisZhangFuDetail",
+            "c": "HisHomeDingPan",
+            "Day": date,
+        })
+        errcode = str(payload.get("errcode"))
+        if errcode == "1020":
+            return {}
+        if errcode != "0":
+            raise RuntimeError(
+                f"HisZhangFuDetail 接口返回错误: errcode={errcode}"
+            )
+
+        def _to_int(value):
+            try:
+                return int(value)
+            except (TypeError, ValueError):
+                return None
+
+        info = payload.get("info") or {}
+        return {
+            "up_count": _to_int(info.get("SZJS")),
+            "down_count": _to_int(info.get("XDJS")),
+            # SJZT/SJDT 为「实际涨停/实际跌停」，与 MoodNumCount 的 ZTJS/DTJS 口径一致
+            "limit_up": _to_int(info.get("SJZT")),
+            "limit_down": _to_int(info.get("SJDT")),
+            "sign": info.get("sign"),
+        }
+
     def fetch_plate_stocks(self, plate_id: str, date: str) -> list[dict]:
         """拉取指定板块在指定交易日的完整成分股列表。
 

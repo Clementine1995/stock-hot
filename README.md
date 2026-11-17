@@ -71,7 +71,7 @@ stock-hot/
 │   ├── render/           # 渲染层：wheel.py / mood.py / report.py
 │   └── storage/          # 存储层：store.py（快照读写，唯一访问点）
 ├── tests/                # 单元测试
-├── data/                 # JSON 快照（数据资产，进 git）
+├── data/                 # JSON 快照（可再生，不进 git；backfill.py 重拉）
 ├── output/               # 静态产物（派生，可重新生成，不进 git）
 └── docs/
     ├── requirements/     # 需求文档 REQ-001
@@ -81,7 +81,7 @@ stock-hot/
 ## 数据源与指标（摘要）
 
 - **板块强度排名**：`RealRankingInfo` 接口（历史域 `apphis.longhuvip.com`），支持按 `Date` 回查历史；`st` 固定 30、`Index` 每页 +30 翻页；`errcode=1020` = 非交易日。字段：代码 / 名称 / 强度 / 涨跌幅 / 成交额 / 主力净额。
-- **市场情绪**：`MoodNumCount` 接口（当日域 `apphwhq.longhuvip.com`），只返回当前最新（**不支持历史回查**），故情绪温度历史只能靠每天刷新累积。
+- **市场情绪**：`MoodNumCount`（当日域 `apphwhq.longhuvip.com`，只返回最新）+ `HisZhangFuDetail`（历史域 `apphis.longhuvip.com`，`Day` 参数可回查全市场涨跌家数/涨停跌停）。情绪温度历史可经 `python backfill.py 30 <最近交易日>` 回补。
 - 完整字段映射见 `docs/research-开盘啦数据源调研.md`。
 
 ## 架构与扩展

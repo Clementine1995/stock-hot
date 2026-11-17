@@ -129,7 +129,20 @@
   .thermo-scale { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); }
   .mood-note { font-size: 11px; color: var(--muted); margin-top: 8px; }
   .mood-card h2 { margin: 0 0 12px; font-size: 14px; color: #4d5967; }
-  .chart-wrap { width: 100%; max-width: 860px; }
+  .chart-wrap { width: 100%; max-width: 960px; }
+  .mood-legend { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; font-size: 11px; color: var(--muted); margin: 10px 0 4px; }
+  .mood-legend .sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
+  .mood-legend .count { margin-left: auto; }
+  .mood-stats { display: flex; gap: 30px; flex-wrap: wrap; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line); }
+  .mood-stat .k { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+  .mood-stat .v { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1; }
+  .mood-stat .v.up { color: var(--up); }
+  .mood-stat .v.down { color: var(--down); }
+  .mood-stat .v.flat { color: var(--text); }
+  .chart-tip { position: fixed; z-index: 100; pointer-events: none; background: #23272e; color: #fff;
+    font-size: 12px; line-height: 1.5; padding: 7px 11px; border-radius: 7px;
+    box-shadow: 0 6px 18px rgba(0,0,0,.25); display: none; white-space: nowrap; }
+  .chart-tip b { font-size: 12px; }
 
   /* 报表 */
   .report-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
@@ -386,32 +399,59 @@ function tempState(t) {
 }
 
 function lineChartSVG(series) {
-  const width = 640, height = 250, left = 56, right = 618, top = 20, bottom = 208;
-  const n = series.length;
+  const W = 860, H = 300, left = 56, right = 828, top = 30, bottom = 256;
+  const y = t => bottom - (t / 100) * (bottom - top);
   const parts = [];
-  [0, 20, 40, 60, 80, 100].forEach(tick => {
-    const y = bottom - (tick / 100) * (bottom - top);
-    parts.push('<line x1="' + left + '" y1="' + y.toFixed(1) + '" x2="' + right + '" y2="' + y.toFixed(1) + '" stroke="#eceef1"/>');
-    parts.push('<text x="' + (left - 8) + '" y="' + (y + 4).toFixed(1) + '" text-anchor="end" font-size="10" fill="#7b8794">' + tick + '</text>');
+  // 绿/橙/红三色背景分区（冰点/中性/高温）
+  parts.push('<rect x="' + left + '" y="' + top + '" width="' + (right - left) + '" height="' + (y(60) - top).toFixed(1) + '" fill="rgba(224,49,49,0.07)"/>');
+  parts.push('<rect x="' + left + '" y="' + y(60).toFixed(1) + '" width="' + (right - left) + '" height="' + (y(40) - y(60)).toFixed(1) + '" fill="rgba(240,140,0,0.07)"/>');
+  parts.push('<rect x="' + left + '" y="' + y(40).toFixed(1) + '" width="' + (right - left) + '" height="' + (bottom - y(40)).toFixed(1) + '" fill="rgba(12,166,120,0.07)"/>');
+  parts.push('<text x="' + (right - 4) + '" y="' + (y(80) + 4).toFixed(1) + '" text-anchor="end" font-size="10" fill="#e03131" opacity="0.5">高温</text>');
+  parts.push('<text x="' + (right - 4) + '" y="' + (y(50) + 4).toFixed(1) + '" text-anchor="end" font-size="10" fill="#f08c00" opacity="0.5">中性</text>');
+  parts.push('<text x="' + (right - 4) + '" y="' + (y(20) + 4).toFixed(1) + '" text-anchor="end" font-size="10" fill="#0ca678" opacity="0.5">冰点</text>');
+  // 网格线 + Y 轴刻度
+  [0, 20, 40, 60, 80, 100].forEach(t => {
+    const yy = y(t);
+    parts.push('<line x1="' + left + '" y1="' + yy.toFixed(1) + '" x2="' + right + '" y2="' + yy.toFixed(1) + '" stroke="#e9e6df"/>');
+    parts.push('<text x="' + (left - 8) + '" y="' + (yy + 4).toFixed(1) + '" text-anchor="end" font-size="10" fill="#7b8794">' + t + '</text>');
   });
+  const n = series.length;
   const pts = [];
   series.forEach((item, i) => {
     if (item.temperature === null || item.temperature === undefined) return;
     const x = left + (right - left) * (n > 1 ? i / (n - 1) : 0.5);
-    const y = bottom - (item.temperature / 100) * (bottom - top);
-    pts.push({ x, y, t: item.temperature, d: item.date });
+    pts.push({ x, y: y(item.temperature), t: item.temperature, d: item.date });
   });
   if (!pts.length) {
-    parts.push('<text x="' + ((left + right) / 2) + '" y="' + (top + 60) + '" text-anchor="middle" font-size="13" fill="#9aa3ad">暂无有效温度数据</text>');
+    parts.push('<text x="' + ((left + right) / 2) + '" y="' + (top + 70) + '" text-anchor="middle" font-size="13" fill="#9aa3ad">暂无有效温度数据</text>');
   }
+  // 面积填充
   if (pts.length >= 2) {
-    parts.push('<polyline points="' + pts.map(p => p.x.toFixed(1) + ',' + p.y.toFixed(1)).join(' ') + '" fill="none" stroke="#4d5967" stroke-width="2"/>');
+    const area = 'M' + pts[0].x.toFixed(1) + ',' + y(0).toFixed(1) +
+      ' L' + pts.map(p => p.x.toFixed(1) + ',' + p.y.toFixed(1)).join(' L') +
+      ' L' + pts[pts.length - 1].x.toFixed(1) + ',' + y(0).toFixed(1) + ' Z';
+    parts.push('<path d="' + area + '" fill="rgba(77,89,103,0.08)"/>');
   }
-  pts.forEach(p => {
-    parts.push('<circle cx="' + p.x.toFixed(1) + '" cy="' + p.y.toFixed(1) + '" r="4" fill="' + tempColor(p.t) + '"/>');
-    parts.push('<text x="' + p.x.toFixed(1) + '" y="' + (bottom + 20) + '" text-anchor="middle" font-size="10" fill="#7b8794">' + md(p.d) + '</text>');
+  // 折线
+  if (pts.length >= 2) {
+    parts.push('<polyline points="' + pts.map(p => p.x.toFixed(1) + ',' + p.y.toFixed(1)).join(' ') + '" fill="none" stroke="#4d5967" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>');
+  }
+  // 数据点 + 数值标注 + 日期 + hover 热区（点数多时隔几个标注，避免重叠）
+  const labelStep = Math.max(1, Math.ceil(pts.length / 12));
+  pts.forEach((p, idx) => {
+    const c = tempColor(p.t);
+    const showLabel = idx % labelStep === 0 || idx === pts.length - 1;
+    if (showLabel) {
+      const labelY = p.y >= 40 ? p.y - 12 : p.y + 22;
+      parts.push('<text x="' + p.x.toFixed(1) + '" y="' + labelY.toFixed(1) + '" text-anchor="middle" font-size="12" font-weight="700" fill="' + c + '">' + p.t.toFixed(1) + '</text>');
+    }
+    parts.push('<circle class="pt" data-d="' + p.d + '" data-t="' + p.t + '" cx="' + p.x.toFixed(1) + '" cy="' + p.y.toFixed(1) + '" r="5" fill="' + c + '" stroke="#fff" stroke-width="2"/>');
+    parts.push('<circle class="pt" data-d="' + p.d + '" data-t="' + p.t + '" cx="' + p.x.toFixed(1) + '" cy="' + p.y.toFixed(1) + '" r="16" fill="transparent"/>');
+    if (showLabel) {
+      parts.push('<text x="' + p.x.toFixed(1) + '" y="' + (bottom + 22) + '" text-anchor="middle" font-size="11" fill="#7b8794">' + md(p.d) + '</text>');
+    }
   });
-  return '<svg viewBox="0 0 ' + width + ' ' + height + '" xmlns="http://www.w3.org/2000/svg" style="width:100%">' + parts.join('') + '</svg>';
+  return '<svg viewBox="0 0 ' + W + ' ' + H + '" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block">' + parts.join('') + '</svg>';
 }
 
 function renderMood() {
@@ -422,16 +462,62 @@ function renderMood() {
   const color = tempColor(temp);
   const markerLeft = (temp !== null && temp !== undefined) ? temp : 0;
   const hasHist = series.filter(s => s.temperature !== null && s.temperature !== undefined).length;
+  const mood = (cur && cur.mood) ? cur.mood : {};
+
+  const stat = (k, v, cls) => '<div class="mood-stat"><div class="k">' + k + '</div><div class="v ' + cls + '">' + fmt(v) + '</div></div>';
+
   sec.innerHTML =
-    '<div class="mood-card"><div class="mood-current">' +
-    '<div class="temp-big" style="color:' + color + '">' + fmt(temp) + '</div>' +
-    '<div><div class="temp-state" style="color:' + color + '">' + tempState(temp) + '</div>' +
-    '<div class="temp-date">' + (cur ? cur.date : '—') + '</div></div></div>' +
-    '<div style="margin-top:16px"><div class="thermo-bar"><div class="thermo-marker" style="left:' + markerLeft + '%"></div></div>' +
-    '<div class="thermo-scale"><span>0 冰点</span><span>50 中性</span><span>100 高温</span></div></div>' +
-    '<div class="mood-note">温度由涨跌家数 + 涨停/跌停家数自算；历史温度需每日点「刷新数据」累积（接口不支持情绪历史回查）。当前有效历史点：' + hasHist + ' 个。</div>' +
+    '<div class="mood-card">' +
+      '<div class="mood-current">' +
+        '<div class="temp-big" style="color:' + color + '">' + fmt(temp) + '</div>' +
+        '<div><div class="temp-state" style="color:' + color + '">' + tempState(temp) + '</div>' +
+        '<div class="temp-date">' + (cur ? cur.date : '—') + '</div></div>' +
+      '</div>' +
+      '<div style="margin-top:16px"><div class="thermo-bar"><div class="thermo-marker" style="left:' + markerLeft + '%"></div></div>' +
+      '<div class="thermo-scale"><span>0 冰点</span><span>50 中性</span><span>100 高温</span></div></div>' +
+      '<div class="mood-stats">' +
+        stat('上涨家数', mood.up_count, 'up') +
+        stat('下跌家数', mood.down_count, 'down') +
+        stat('涨停家数', mood.limit_up, 'up') +
+        stat('跌停家数', mood.limit_down, 'down') +
+      '</div>' +
     '</div>' +
-    '<div class="mood-card"><h2>近 N 日温度曲线</h2><div class="chart-wrap">' + lineChartSVG(series) + '</div></div>';
+    '<div class="mood-card">' +
+      '<h2>近 ' + hasHist + ' 日温度曲线</h2>' +
+      '<div class="mood-legend">' +
+        '<span><span class="sw" style="background:#0ca678"></span>0–40 冰点·低温</span>' +
+        '<span><span class="sw" style="background:#f08c00"></span>40–60 中性·震荡</span>' +
+        '<span><span class="sw" style="background:#e03131"></span>60–100 高温·亢奋</span>' +
+        '<span class="count">有效历史点 ' + hasHist + ' 个</span>' +
+      '</div>' +
+      '<div class="chart-wrap">' + lineChartSVG(series) + '</div>' +
+      '<div class="mood-note">悬停数据点查看详情 · 历史温度需每日点「刷新数据」累积（接口不支持情绪历史回查）。</div>' +
+    '</div>';
+
+  bindMoodTooltip();
+}
+
+function bindMoodTooltip() {
+  const sec = document.getElementById('tab-mood');
+  const svg = sec.querySelector('svg');
+  if (!svg) return;
+  if (!window._moodTip) {
+    window._moodTip = document.createElement('div');
+    window._moodTip.className = 'chart-tip';
+    document.body.appendChild(window._moodTip);
+  }
+  const tip = window._moodTip;
+  svg.querySelectorAll('.pt').forEach(el => {
+    el.addEventListener('mouseenter', () => {
+      tip.innerHTML = '<b>' + el.dataset.d + '</b><br>温度 ' + el.dataset.t + ' · ' + tempState(+el.dataset.t);
+      tip.style.display = 'block';
+    });
+    el.addEventListener('mousemove', e => {
+      tip.style.left = (e.clientX + 14) + 'px';
+      tip.style.top = (e.clientY - 40) + 'px';
+    });
+    el.addEventListener('mouseleave', () => { tip.style.display = 'none'; });
+  });
 }
 
 /* ---------- 数字报表 ---------- */
