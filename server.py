@@ -49,6 +49,11 @@ def build_web_data() -> dict:
     snapshots = load_all_snapshots()
     days, series, records = build_panel_data(snapshots)
     mood_series = build_mood_series(snapshots)
+    # 题材名 -> {date: change_pct}，用于高频板块近 N 日涨跌幅走势图
+    change_series: dict[str, dict[str, float]] = {}
+    for snap in snapshots:
+        for plate in snap["plates"]:
+            change_series.setdefault(plate["name"], {})[snap["date"]] = plate.get("change_pct")
 
     latest = None
     if snapshots:
@@ -87,6 +92,7 @@ def build_web_data() -> dict:
     return {
         "days": days,
         "series": series,
+        "change_series": change_series,
         "mood_series": mood_series,
         "stats": {"n_days": len(days), "n_records": records, "n_plates": len(series)},
         "latest": latest,

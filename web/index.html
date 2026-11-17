@@ -288,6 +288,29 @@
   .freq-strength.down { color: var(--down); }
   .freq-strength.flat { color: var(--muted); }
 
+  /* 高频板块走势图 —— 点击行下方展开 */
+  .freq-table tr.trend-row { cursor: default; }
+  .freq-table tr.trend-row:hover { background: transparent; }
+  .freq-table tr.trend-row td { padding: 6px 14px 16px; background: #fbfaf7; border-bottom: 1px solid #f3f0ea; }
+  .trend-wrap { padding: 8px 4px 2px; }
+  .trend-head { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+  .trend-title { font-size: 13px; font-weight: 700; }
+  .trend-title .tag { color: var(--muted); font-weight: 400; font-size: 11px; margin-left: 6px; }
+  .trend-legend { margin-left: auto; display: flex; align-items: center; gap: 16px; font-size: 11px; color: var(--muted); }
+  .trend-legend .lg-bar { display: inline-block; width: 10px; height: 10px; border-radius: 2px; vertical-align: -1px; margin-right: 4px; }
+  .trend-legend .lg-bar.bar { background: var(--up); }
+  .trend-legend .lg-bar.down { background: var(--down); }
+  .trend-legend .lg-line { display: inline-block; width: 14px; height: 2px; background: var(--hl-line); vertical-align: 3px; margin-right: 4px; }
+  .trend-pool-btn {
+    margin-left: auto; font-size: 11px; font-weight: 600; color: var(--hl-line);
+    border: 1px solid var(--hl-line); background: #fff; border-radius: 6px;
+    padding: 3px 10px; cursor: pointer; white-space: nowrap; line-height: 1.4;
+  }
+  .trend-pool-btn:hover { background: var(--hl-bg); }
+  .trend-chart { width: 100%; display: block; }
+  .trend-empty { font-size: 12px; color: var(--muted); padding: 10px 4px; }
+
+
   /* 每日题材轮动明细 —— 折叠收起，让位给高频板块 */
   .daily-collapse { margin-bottom: 8px; }
   .daily-toggle {
@@ -925,6 +948,116 @@ function renderStockPool() {
   sec.innerHTML = html;
 }
 
+function renderPlateTrend(name) {
+  // 近 N 日走势：上=净值曲线（逐日复利累积涨跌幅，基准 100） 下=涨跌幅柱（红涨绿跌）
+  const cs = (DATA.change_series || {})[name] || {};
+  const dates = DATA.days.map(function (d) { return d.date; }).slice(0, 10).reverse();
+  const pts = dates.filter(function (d) { return cs[d] != null; });
+  if (!pts.length) return '<div class="trend-empty">暂无该板块近期数据</div>';
+
+  // 净值：基准日 100，逐日 ×(1 + 涨跌幅/100)
+  let acc = 100;
+  const nav = pts.map(function (d) {
+    acc = acc * (1 + (cs[d] || 0) / 100);
+    return { date: d, nav: acc };
+  });
+
+  const W = 660, H = 300;
+  const left = 56, right = 636;
+  const top1 = 16, bottom1 = 152;    // 净值曲线区
+  const top2 = 184, bottom2 = 250;   // 涨跌幅柱区
+  const xAxisY = 278;
+  const n = nav.length;
+  const slot = (right - left) / n;
+  const cx = function (i) { return left + slot * i + slot / 2; };
+
+  // 净值 Y 映射（含 100 基准，留 12% padding）
+  const navVals = nav.map(function (p) { return p.nav; });
+  let nvMin = Math.min.apply(null, navVals.concat([100]));
+  let nvMax = Math.max.apply(null, navVals.concat([100]));
+  if (nvMin === nvMax) { nvMin -= 1; nvMax += 1; }
+  const nvPad = (nvMax - nvMin) * 0.12;
+  nvMin -= nvPad; nvMax += nvPad;
+  const navY = function (v) { return top1 + (nvMax - v) / (nvMax - nvMin) * (bottom1 - top1); };
+
+  // 涨跌幅柱 Y 映射
+  let maxAbs = 0;
+  pts.forEach(function (d) { const v = Math.abs(cs[d] || 0); if (v > maxAbs) maxAbs = v; });
+  if (maxAbs === 0) maxAbs = 1;
+  const zeroY = (top2 + bottom2) / 2;
+  const barH = (bottom2 - top2) / 2 - 6;
+  const barW = Math.min(slot * 0.52, 26);
+
+  // 净值折线 + 面积填充 + 末端标注
+  let linePts = '', areaPath = '';
+  nav.forEach(function (p, i) {
+    const x = cx(i), y = navY(p.nav);
+    linePts += (linePts ? ' ' : '') + x.toFixed(1) + ',' + y.toFixed(1);
+    if (i === 0) areaPath = 'M ' + x.toFixed(1) + ' ' + y.toFixed(1);
+    else areaPath += ' L ' + x.toFixed(1) + ' ' + y.toFixed(1);
+  });
+  areaPath += ' L ' + cx(n - 1).toFixed(1) + ' ' + bottom1.toFixed(1) +
+              ' L ' + cx(0).toFixed(1) + ' ' + bottom1.toFixed(1) + ' Z';
+  const last = nav[n - 1];
+  const navDot = '<circle cx="' + cx(n - 1).toFixed(1) + '" cy="' + navY(last.nav).toFixed(1) + '" r="3.4" fill="#f08c00" stroke="#fff" stroke-width="1.5"/>' +
+    '<text x="' + (cx(n - 1) - 8).toFixed(1) + '" y="' + (navY(last.nav) - 8).toFixed(1) + '" font-size="11" font-weight="700" fill="#f08c00" text-anchor="end">' + last.nav.toFixed(1) + '</text>';
+
+  // 涨跌幅柱
+  let bars = '';
+  pts.forEach(function (d, i) {
+    const x = cx(i), chg = cs[d] || 0;
+    let y1, y2, fill;
+    if (chg > 0) { y1 = zeroY - (Math.abs(chg) / maxAbs) * barH; y2 = zeroY; fill = '#e03131'; }
+    else if (chg < 0) { y1 = zeroY; y2 = zeroY + (Math.abs(chg) / maxAbs) * barH; fill = '#0ca678'; }
+    else { y1 = zeroY - 1; y2 = zeroY + 1; fill = '#d3cec4'; }
+    bars += '<rect x="' + (x - barW / 2).toFixed(1) + '" y="' + y1.toFixed(1) + '" width="' + barW.toFixed(1) + '" height="' + Math.max(1.5, (y2 - y1)).toFixed(1) + '" rx="1.5" fill="' + fill + '"><title>' + d + ' 涨跌 ' + (chg > 0 ? '+' : '') + chg + '%</title></rect>';
+  });
+
+  // 净值左轴刻度（nvMax / 100 / nvMin）
+  const navTicks = [nvMax, 100, nvMin].filter(function (v, i, a) { return a.indexOf(v) === i; }).sort(function (a, b) { return b - a; });
+  let navAxis = '';
+  navTicks.forEach(function (v) {
+    const isBase = Math.abs(v - 100) < 0.001;
+    navAxis += '<text x="' + (left - 8) + '" y="' + (navY(v) + 3).toFixed(1) + '" font-size="10" fill="' + (isBase ? '#e03131' : '#9a958c') + '" text-anchor="end">' + v.toFixed(1) + '</text>';
+  });
+
+  // 涨跌幅左轴刻度
+  const chgAxis = '<text x="' + (left - 8) + '" y="' + (top2 + 4) + '" font-size="10" fill="#e03131" text-anchor="end">+' + (maxAbs >= 10 ? maxAbs.toFixed(0) : maxAbs.toFixed(1)) + '%</text>' +
+    '<text x="' + (left - 8) + '" y="' + (zeroY + 3) + '" font-size="10" fill="#9a958c" text-anchor="end">0</text>' +
+    '<text x="' + (left - 8) + '" y="' + (bottom2 - 1) + '" font-size="10" fill="#0ca678" text-anchor="end">-' + (maxAbs >= 10 ? maxAbs.toFixed(0) : maxAbs.toFixed(1)) + '%</text>';
+
+  // X 轴日期（隔一个标）
+  let xLabels = '';
+  nav.forEach(function (p, i) {
+    if (n <= 6 || i % 2 === 0) {
+      xLabels += '<text x="' + cx(i).toFixed(1) + '" y="' + xAxisY + '" font-size="10" fill="#9a958c" text-anchor="middle">' + p.date.slice(5).replace('-', '/') + '</text>';
+    }
+  });
+
+  const svg = '<svg class="trend-chart" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="xMidYMid meet">' +
+    // 净值区浅底 + 100 基准虚线
+    '<rect x="' + left + '" y="' + top1 + '" width="' + (right - left) + '" height="' + (bottom1 - top1) + '" fill="#fbfaf7" rx="4"/>' +
+    '<line x1="' + left + '" y1="' + navY(100).toFixed(1) + '" x2="' + right + '" y2="' + navY(100).toFixed(1) + '" stroke="#e6e3dc" stroke-width="1" stroke-dasharray="3 3"/>' +
+    '<path d="' + areaPath + '" fill="rgba(240,140,0,0.10)" stroke="none"/>' +
+    '<polyline points="' + linePts + '" fill="none" stroke="#f08c00" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>' +
+    navDot +
+    // 主/副图分隔线 + 副图 0 轴
+    '<line x1="' + left + '" y1="' + (bottom1 + 14) + '" x2="' + right + '" y2="' + (bottom1 + 14) + '" stroke="#f0ede6" stroke-width="1"/>' +
+    '<line x1="' + left + '" y1="' + zeroY + '" x2="' + right + '" y2="' + zeroY + '" stroke="#e6e3dc" stroke-width="1"/>' +
+    bars +
+    navAxis + chgAxis + xLabels +
+    '</svg>';
+
+  const navChg = last.nav - 100;
+  const navChgClr = navChg >= 0 ? '#e03131' : '#0ca678';
+  const legend = '<div class="trend-head">' +
+    '<span class="trend-title">' + name + '<span class="tag">近 ' + n + ' 日走势 · 净值 <b style="color:#f08c00">' + last.nav.toFixed(1) + '</b>（<b style="color:' + navChgClr + '">' + (navChg >= 0 ? '+' : '') + navChg.toFixed(1) + '%</b>）</span></span>' +
+    '<span class="trend-legend"><span><i class="lg-line"></i>净值曲线</span><span><i class="lg-bar bar"></i><i class="lg-bar down" style="margin-left:2px"></i>涨跌幅</span></span>' +
+    '<button class="trend-pool-btn" type="button" data-name="' + name + '" data-code="' + (function () { const f = (DATA.plate_frequency || []).find(function (x) { return x.name === name; }); return f ? f.code : ''; })() + '">查看核心票 →</button>' +
+  '</div>';
+  return '<div class="trend-wrap">' + legend + svg + '</div>';
+}
+
 function renderFreq() {
   const board = document.getElementById('freq-board');
   if (!board) return;
@@ -945,7 +1078,7 @@ function renderFreq() {
 
   let html = '<div class="freq-board-head">' +
     '<span class="freq-board-title">近' + windowDays + '日高频板块 · <span class="hl-tag">主线追踪</span></span>' +
-    '<span class="freq-board-sub">进入走强榜 top15 的次数 · 红点=当日上榜 · 点击查看核心票</span>' +
+    '<span class="freq-board-sub">进入走强榜 top15 的次数 · 红点=当日上榜 · 点击展开走势图</span>' +
     '<span class="freq-board-meta">共 <b>' + frequent.length + '</b> 条主线</span>' +
   '</div>';
   html += '<table class="freq-table"><thead><tr>' +
@@ -967,7 +1100,7 @@ function renderFreq() {
     const dots = (f.daily || []).map(function (v) {
       return '<span class="dot' + (v ? ' on' : '') + '" title="' + (v ? '上榜' : '未上榜') + '"></span>';
     }).join('');
-    html += '<tr data-name="' + f.name + '" data-code="' + f.code + '" title="点击查看「' + f.name + '」核心票">' +
+    html += '<tr data-name="' + f.name + '" data-code="' + f.code + '" title="点击展开「' + f.name + '」近10日走势图">' +
       '<td style="text-align:center"><span class="rank-badge' + rankCls + '">' + (i + 1) + '</span></td>' +
       '<td><span class="freq-plate"><span class="freq-name">' + f.name + '<span class="code">' + (f.code || '') + '</span></span>' +
         (lead ? '<span class="freq-lead"><span class="lbl">龙头</span> <span class="nm">' + lead + '</span></span>' : '') +
@@ -979,13 +1112,29 @@ function renderFreq() {
   });
   html += '</tbody></table>';
   board.innerHTML = html;
-  // 点击整行：高亮 + 底部轨迹 + 核心票抽屉
+  // 点击整行：展开/收起该板块近10日走势图（再点收起）
   board.querySelectorAll('tbody tr').forEach(function (row) {
     row.addEventListener('click', function () {
+      const next = row.nextElementSibling;
+      const wasOpen = next && next.classList.contains('trend-row');
+      board.querySelectorAll('tbody tr.trend-row').forEach(function (tr) { tr.remove(); });
       board.querySelectorAll('tbody tr').forEach(function (r) { r.classList.remove('active'); });
+      if (wasOpen) return; // 原本展开 → 本次点击即收起
       row.classList.add('active');
       selectPlate(row.dataset.name);
-      openPlateStocks(row.dataset.name, row.dataset.code);
+      const tr = document.createElement('tr');
+      tr.className = 'trend-row';
+      const td = document.createElement('td');
+      td.colSpan = 5;
+      td.innerHTML = renderPlateTrend(row.dataset.name);
+      tr.appendChild(td);
+      row.insertAdjacentElement('afterend', tr);
+      td.querySelectorAll('.trend-pool-btn').forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+          e.stopPropagation();
+          openPlateStocks(btn.dataset.name, btn.dataset.code);
+        });
+      });
     });
   });
 }
