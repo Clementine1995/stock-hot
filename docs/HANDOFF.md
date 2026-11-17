@@ -5,7 +5,7 @@
 
 ## 一、一句话现状
 
-本地 A 股热点面板：从**开盘啦匿名接口**拉板块强度 + 市场情绪家数，**自算情绪温度**，本地 Web 站点三栏展示（题材强度轮动日历墙 / 情绪温度面板 / 数字报表），页面「刷新数据」按钮更新最近交易日。零第三方依赖，JSON 快照存储。
+本地 A 股热点面板：从**开盘啦匿名接口**拉板块强度 + 市场情绪家数，**自算情绪温度**，本地 Web 站点多标签展示（题材强度轮动日历墙 / 情绪温度面板 / 数字报表 / 核心票池），页面「刷新数据」按钮更新最近交易日。零第三方依赖，JSON 快照存储。
 
 ## 二、数据源（接手必需，最易踩坑处）
 
@@ -17,6 +17,8 @@
 | --- | --- | --- |
 | `RealRankingInfo` | `apphis.longhuvip.com`（历史域） | 板块强度排名，**支持 `Date` 回查历史** |
 | `MoodNumCount` | `apphwhq.longhuvip.com`（当日域） | 市场情绪家数，**只返回最新，忽略 `Date`** |
+| `HisZhangFuDetail` | `apphis.longhuvip.com`（历史域） | 全市场涨跌/涨停/跌停家数，**支持 `Day` 回查历史**（情绪历史回补用） |
+| `ZhiShuStockList_W8` | `apphis.longhuvip.com`（历史域） | 板块完整成分股（`Type=22`），**支持 `Date` 回查**（核心票池用） |
 
 **字段映射**（`RealRankingInfo` 返回 `list[][]`，下标语义）：
 - `[0]` 板块代码、`[1]` 名称、`[2]` 强度、`[3]` 涨跌幅%、`[5]` 成交额(元)、`[6]` 主力净额(元)。
@@ -50,10 +52,10 @@
 采集层  src/collectors/   base.py（抽象 Collector）+ kaipanla.py（开盘啦实现）
 存储层  src/storage/store.py   快照读写（唯一访问点，迁 SQLite 只改这里）
 指标层  src/indicators/mood.py 情绪温度纯函数
-展示层  server.py + web/index.html  单页三栏 + 刷新按钮
+展示层  server.py + web/index.html  单页多标签 + 刷新按钮
 ```
 
-> DeepSeek 点评待做，届时新增 `src/llm/` 模块，走「采集→计算→点评」后处理链路（当前无此目录）。
+> DeepSeek 点评已接入 `src/llm/review.py`（默认关闭），走「采集→计算→点评」后处理链；`config.local.json`（不入库）填 key 并置 `enabled=true` 启用。
 
 路由（`server.py`）：
 - `GET /` → `web/index.html`
@@ -75,15 +77,18 @@
 ## 五、已完成 / 待办
 
 **已完成**：
-- 采集层（开盘啦匿名接口，零依赖）+ 回补 30 交易日快照。
-- 情绪温度自算（v1 公式 + 5 单测）。
+- 采集层（开盘啦匿名接口，零依赖）+ 回补 30 交易日快照（板块强度 + 情绪均可历史回查）。
+- 情绪温度自算（v1 公式，系数经 30 交易日标定：广度 30 / 强度 0.2）。
 - 题材强度轮动日历墙（8 列、强势红/弱势绿、点题材跨卡高亮 + 底部轨迹）。
 - 情绪温度面板（大字 + 三色温度计 + SVG 折线）。
-- 数字报表（Markdown）+ `run.py` 一条命令静态产物。
-- 本地常驻网站（`server.py` + `web/index.html` 三栏 + 刷新按钮）。
+- 数字报表（Markdown，含涨幅/主力/成交额多维榜单）+ `run.py` 一条命令静态产物。
+- 板块核心票池（走强板块成分股 → 领涨/中军 top5，票池 tab）。
+- 高频板块（近 10 日走强榜上榜天数）+ 近 N 日走势图（净值曲线 + 涨跌幅柱）。
+- DeepSeek 每日点评（`src/llm/review.py`，默认关闭，预算熔断 + 缓存 + 指纹记账）。
+- 本地常驻网站（`server.py` + `web/index.html` 多标签 + 刷新按钮）。
 
 **待办**：
-1. DeepSeek 每日点评（批次 4b）——待 API key，接入 `llm/`。
+1. DeepSeek 每日点评启用——代码已接入，待 API key 并在 `config.local.json` 置 `enabled=true`。
 2. 轮动面板编辑型工具栏（反红/标增/删除/重排/保存，含标注持久化）。
 3. 快照 schema 扩展（见下）。
 
@@ -91,7 +96,7 @@
 
 1. **若加龙虎榜 / 涨停梯队 / 连板率等新数据维度**：先把快照从单文件单结构改为分类型文件（`data/日期/plates.json`、`mood.json`、`lhb.json`…），每种数据独立扩展。现在改成本低。
 2. **数据量大了或要跨日聚合/关联**：迁 SQLite，只改 `storage/store.py` 内部实现，上层不动。
-3. **DeepSeek 点评**：接入时记得走 AGENTS.md 红线——付费调用先记回执 + 预算熔断 + 开关显式 `true` 才开。
+3. **DeepSeek 点评**：已接入（`src/llm/review.py`），启用时记得走 AGENTS.md 红线——付费调用先记回执 + 预算熔断 + 开关显式 `true` 才开。
 
 ## 七、环境事实（本机：home 机器；另一台 work 机器路径不同）
 
