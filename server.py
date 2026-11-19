@@ -4,7 +4,7 @@
     python server.py [--port 8000]
 启动后浏览器打开 http://127.0.0.1:8000
 
-零第三方依赖（标准库 http.server），只绑定 127.0.0.1，不上云、不对外。
+零第三方依赖（标准库 http.server），默认绑定 127.0.0.1；部署到云沙盒时读 PORT 环境变量并绑 0.0.0.0。
 路由：
     GET  /            返回站点单页（web/index.html）
     GET  /api/data    返回全部快照 + 轮动/温度/报表所需的结构化数据
@@ -12,6 +12,7 @@
 """
 
 import json
+import os
 import sys
 from datetime import datetime, timedelta, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -164,6 +165,11 @@ def collect_stocks_archived(collector, start_date_str, plates):
     return start_date_str, []
 
 
+# 每日点评（DeepSeek 付费调用）默认关闭：发布后 /api/review 会暴露到公网，开启会消耗 token。
+# 需本地使用时改为 True。
+_REVIEW_ENABLED = False
+
+
 class Handler(BaseHTTPRequestHandler):
     def _send(self, status: int, ctype: str, body: bytes):
         self.send_response(status)
@@ -245,7 +251,14 @@ class Handler(BaseHTTPRequestHandler):
             self._send_json({"ok": False, "error": str(exc)}, 500)
 
     def _handle_review_post(self, parsed):
-        """生成当日点评（手动触发，付费调用）。"""
+        """生成当日点评（手动触发，付费调用）。
+
+        默认关闭：发布后 /api/review 会暴露到公网，开启会消耗 DeepSeek token。
+        需本地使用时把 _REVIEW_ENABLED 改为 True。
+        """
+        if not _REVIEW_ENABLED:
+            self._send_json({"ok": False, "skipped": True, "reason": "点评功能已关闭"})
+            return
         qs = parse_qs(parsed.query)
         force = qs.get("force", ["0"])[0] in ("1", "true", "True")
         snapshots = load_all_snapshots()
@@ -289,10 +302,10 @@ class Handler(BaseHTTPRequestHandler):
 
 
 def main():
-    port = 8000
+    port = int(os.environ.get("PORT", "8000"))
     if len(sys.argv) == 3 and sys.argv[1] == "--port":
         port = int(sys.argv[2])
-    server = ThreadingHTTPServer(("127.0.0.1", port), Handler)
+    server = ThreadingHTTPServer(("0.0.0.0", port), Handler)
     print(f"stock-hot 站点已启动: http://127.0.0.1:{port}")
     print("浏览器打开上面的地址即可；按 Ctrl+C 停止。")
     try:

@@ -419,12 +419,19 @@
 <script>
 let DATA = null;
 
+/* 把当前页面 URL 的 query（线上含 sharecode 鉴权参数）透传到接口请求；本地无 query 时保持原样 */
+function api(p) {
+  const qs = location.search.replace(/^\?/, '');
+  if (!qs) return p;
+  return p + (p.indexOf('?') >= 0 ? '&' : '?') + qs;
+}
+
 function fmt(n) { return (n === undefined || n === null) ? '—' : Number(n).toLocaleString('zh-CN'); }
 function md(date) { return date.slice(5).replace('-', ''); }
 
 /* ---------- 数据加载 ---------- */
 async function loadData() {
-  const res = await fetch('/api/data');
+  const res = await fetch(api('/api/data'));
   DATA = await res.json();
   renderAll();
   const s = document.getElementById('status');
@@ -442,7 +449,7 @@ async function refresh() {
   const st = document.getElementById('status');
   btn.disabled = true; btn.textContent = '刷新中…'; st.textContent = '正在采集最新数据…'; st.className = 'status';
   try {
-    const res = await fetch('/api/refresh', { method: 'POST' });
+    const res = await fetch(api('/api/refresh'), { method: 'POST' });
     const r = await res.json();
     if (r.ok) {
       await loadData();
@@ -795,62 +802,9 @@ function reviewCardHTML() {
   return '<div class="review-card">' +
     '<div class="review-head">' +
       '<span class="review-title">每日点评<span class="tag">AI</span></span>' +
-      '<button class="review-btn" id="review-btn" type="button">生成点评</button>' +
     '</div>' +
-    '<div class="review-body placeholder" id="review-body">点评尚未生成</div>' +
-    '<div class="review-meta" id="review-meta"></div>' +
+    '<div class="review-body placeholder" id="review-body">点评功能已关闭</div>' +
   '</div>';
-}
-
-async function loadReview() {
-  try {
-    const res = await fetch('/api/review');
-    const r = await res.json();
-    const body = document.getElementById('review-body');
-    const meta = document.getElementById('review-meta');
-    if (!body) return;
-    if (r.ok && r.review) {
-      body.textContent = r.review;
-      body.className = 'review-body';
-      meta.textContent = r.date + ' · 已生成';
-    } else {
-      body.textContent = '点评尚未生成，点右上角「生成点评」';
-      body.className = 'review-body placeholder';
-    }
-  } catch (e) { /* 忽略，保持占位 */ }
-}
-
-async function generateReview() {
-  const btn = document.getElementById('review-btn');
-  const body = document.getElementById('review-body');
-  const meta = document.getElementById('review-meta');
-  btn.disabled = true; btn.textContent = '生成中…';
-  body.textContent = '正在调用 DeepSeek 生成点评…';
-  body.className = 'review-body placeholder';
-  try {
-    const res = await fetch('/api/review', { method: 'POST' });
-    const r = await res.json();
-    if (r.ok) {
-      body.textContent = r.review;
-      body.className = 'review-body';
-      const u = r.usage || {};
-      meta.textContent = r.date + (r.cached ? ' · 命中缓存' : ' · 本次 token ' + (u.total_tokens || '—'));
-    } else if (r.skipped) {
-      body.textContent = '暂无法生成：' + (r.reason || '未知原因');
-      body.className = 'review-body placeholder';
-      meta.textContent = '';
-    } else {
-      body.textContent = '生成失败：' + (r.error || '未知错误');
-      body.className = 'review-body placeholder';
-      meta.textContent = '';
-    }
-  } catch (e) {
-    body.textContent = '生成失败：' + e.message;
-    body.className = 'review-body placeholder';
-    meta.textContent = '';
-  } finally {
-    btn.disabled = false; btn.textContent = '生成点评';
-  }
 }
 
 function renderReport() {
@@ -899,10 +853,6 @@ function renderReport() {
       openPlateStocks(row.dataset.name, row.dataset.code);
     });
   });
-
-  // 点评按钮 + 读取缓存
-  document.getElementById('review-btn').addEventListener('click', generateReview);
-  loadReview();
 }
 
 function fmtAmt(n) {
@@ -1148,7 +1098,7 @@ function openPlateStocks(name, code) {
   drawer.classList.add('show');
   mask.classList.add('show');
 
-  fetch('/api/plate_stocks?code=' + encodeURIComponent(code))
+  fetch(api('/api/plate_stocks?code=' + encodeURIComponent(code)))
     .then(function (r) { return r.json(); })
     .then(function (data) {
       if (!data.ok) {

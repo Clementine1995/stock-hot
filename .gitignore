@@ -13,6 +13,9 @@ data/
 # 本机工作记忆（不跨机提交）
 .workbuddy/
 
+# 本机发布标记（sites 目录→应用绑定，不跨机提交）
+.wbapp_*.genie
+
 # 本地密钥配置（DeepSeek key 不入库；模板见 config.local.example.json）
 config.local.json
 
