@@ -26,7 +26,16 @@ from src.indicators.stocks import collect_strong_stocks, pick_generals, pick_lea
 from src.llm.review import generate_review, load_review
 from src.render.mood import build_mood_series
 from src.render.wheel import build_panel_data
-from src.storage.store import load_all_snapshots, load_all_stocks, save_snapshot, save_stocks
+from src.storage.store import (
+    load_all_abnormals,
+    load_all_ladders,
+    load_all_snapshots,
+    load_all_stocks,
+    save_abnormal,
+    save_ladder,
+    save_snapshot,
+    save_stocks,
+)
 
 _SHANGHAI_TZ = timezone(timedelta(hours=8))
 _WEB_DIR = Path(__file__).resolve().parent / "web"
@@ -90,6 +99,12 @@ def build_web_data() -> dict:
             "turnover_top10": _rank_plates(plates, "turnover", True),      # 成交额榜
         }
 
+    ladders = load_all_ladders()
+    latest_ladder = ladders[-1] if ladders else None
+
+    abnormals = load_all_abnormals()
+    latest_abnormal = abnormals[-1] if abnormals else None
+
     return {
         "days": days,
         "series": series,
@@ -97,6 +112,8 @@ def build_web_data() -> dict:
         "mood_series": mood_series,
         "stats": {"n_days": len(days), "n_records": records, "n_plates": len(series)},
         "latest": latest,
+        "ladder": latest_ladder,
+        "abnormal": latest_abnormal,
         "stock_pool": build_stock_pool(),
         "plate_frequency": count_strong_rank_days(snapshots, window=10, top_n=15),
     }
@@ -293,7 +310,27 @@ class Handler(BaseHTTPRequestHandler):
             stock_date, stocks = collect_stocks_archived(collector, ds, plates)
             if stocks:
                 save_stocks(stock_date, stocks)
-            self._send_json({"ok": True, "date": ds, "n_plates": len(plates), "n_stocks": len(stocks)})
+            # 连板梯队：仅当日，失败不阻塞核心刷新
+            n_ladder = 0
+            try:
+                ladder = collector.fetch_limit_up_ladder(ds)
+                save_ladder(ds, ladder)
+                n_ladder = len(ladder.get("ladder") or [])
+            except Exception as exc:  # noqa: BLE001 —— 连板接口异常不阻断板块/情绪刷新
+                print(f"[ladder] 采集失败（不影响刷新）: {exc}")
+            # 严重异动（偏离值预警）：仅当日，失败不阻塞核心刷新
+            n_abnormal = 0
+            try:
+                abnormal = collector.fetch_serious_abnormal(ds)
+                save_abnormal(ds, abnormal)
+                n_abnormal = len(abnormal.get("abnormal") or [])
+            except Exception as exc:  # noqa: BLE001 —— 异动接口异常不阻断板块/情绪刷新
+                print(f"[abnormal] 采集失败（不影响刷新）: {exc}")
+            self._send_json({
+                "ok": True, "date": ds,
+                "n_plates": len(plates), "n_stocks": len(stocks),
+                "n_ladder": n_ladder, "n_abnormal": n_abnormal,
+            })
         except Exception as exc:  # noqa: BLE001 —— 采集异常需如实返回前端
             self._send_json({"ok": False, "error": str(exc)}, 500)
 

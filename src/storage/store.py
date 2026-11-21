@@ -91,3 +91,59 @@ def load_all_stocks() -> list[dict]:
         snapshots.append(json.loads(path.read_text(encoding="utf-8")))
     snapshots.sort(key=lambda s: s["date"])
     return snapshots
+
+
+def ladder_path(date: str) -> Path:
+    """返回某交易日连板梯队快照文件路径。"""
+    return DATA_DIR / f"ladder-{date}.json"
+
+
+def save_ladder(date: str, ladder_data: dict) -> Path:
+    """把某交易日的连板梯队落成 JSON 快照，返回文件路径。"""
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    snapshot = dict(ladder_data)
+    snapshot["date"] = date
+    snapshot["collected_at"] = datetime.now(_SHANGHAI_TZ).isoformat(timespec="seconds")
+    path = ladder_path(date)
+    path.write_text(
+        json.dumps(snapshot, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+    return path
+
+
+def load_all_ladders() -> list[dict]:
+    """读取 data/ 下全部连板梯队快照，按日期升序返回。"""
+    ladders = []
+    for path in sorted(DATA_DIR.glob("ladder-*.json")):
+        ladders.append(json.loads(path.read_text(encoding="utf-8")))
+    ladders.sort(key=lambda s: s["date"])
+    return ladders
+
+
+def abnormal_path(date: str) -> Path:
+    """返回某交易日严重异动快照文件路径。"""
+    return DATA_DIR / f"abnormal-{date}.json"
+
+
+def save_abnormal(date: str, abnormal_data: dict) -> Path:
+    """把某交易日的严重异动（偏离值预警）落成 JSON 快照，返回文件路径。"""
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    snapshot = dict(abnormal_data)
+    snapshot["date"] = date
+    snapshot["collected_at"] = datetime.now(_SHANGHAI_TZ).isoformat(timespec="seconds")
+    path = abnormal_path(date)
+    path.write_text(
+        json.dumps(snapshot, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+    return path
+
+
+def load_all_abnormals() -> list[dict]:
+    """读取 data/ 下全部严重异动快照，按日期升序返回。"""
+    abnormals = []
+    for path in sorted(DATA_DIR.glob("abnormal-*.json")):
+        abnormals.append(json.loads(path.read_text(encoding="utf-8")))
+    abnormals.sort(key=lambda s: s["date"])
+    return abnormals

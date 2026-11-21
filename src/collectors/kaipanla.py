@@ -9,6 +9,7 @@
 依赖仅 Python 标准库，无第三方包。
 """
 
+import gzip
 import json
 import urllib.parse
 import urllib.request
@@ -23,10 +24,18 @@ _SHANGHAI_TZ = timezone(timedelta(hours=8))
 _HIS_HOST = "https://apphis.longhuvip.com/w1/api/index.php"
 _HQ_HOST = "https://apphwhq.longhuvip.com/w1/api/index.php"
 
+# iOS 端专用接口（异动提醒等新功能仅走 iOS 链路，域名/协议版本与 Android 不同）
+_IOS_HOST = "https://apphq.longhuvip.com/w1/api/index.php"
+
 # 接口固定客户端标识；接口不要求 token / UserID，仅需随机 DeviceID。
 _API_VERSION = "w42"
 _APP_VERSION = "5.21.0.2"
 _USER_AGENT = "Dalvik/2.1.0 (Linux; U; Android 9; 23116PN5BC Build/PQ3A.190605.01141736)"
+
+# iOS 端客户端标识（异动接口：PhoneOSNew=2 / apiv=w33 / iOS UA，仍为匿名接口）
+_IOS_API_VERSION = "w33"
+_IOS_APP_VERSION = "5.11.0.3"
+_IOS_USER_AGENT = "lhb/5.11.3 (com.kaipanla.www; build:1; iOS 16.3.1) Alamofire/5.11.3"
 
 # RealRankingInfo 返回 list[][] 的字段下标（语义见调研文档）
 _PLATE_CODE = 0
@@ -100,6 +109,30 @@ class KaipanlaCollector(Collector):
         with urllib.request.urlopen(request, timeout=self._timeout) as response:
             raw = response.read().decode("utf-8")
         return json.loads(raw)
+
+    def _post_ios(self, params: dict) -> dict:
+        """向开盘啦 iOS 端接口发 POST 请求并解析 JSON（异动提醒等仅 iOS 链路可用）。"""
+        body_params = dict(params)
+        body_params.update({
+            "PhoneOSNew": "2",
+            "VerSion": _IOS_APP_VERSION,
+            "apiv": _IOS_API_VERSION,
+        })
+        data = urllib.parse.urlencode(body_params).encode("utf-8")
+        request = urllib.request.Request(
+            _IOS_HOST,
+            data=data,
+            headers={
+                "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+                "User-Agent": _IOS_USER_AGENT,
+            },
+            method="POST",
+        )
+        with urllib.request.urlopen(request, timeout=self._timeout) as response:
+            raw = response.read()
+            if response.headers.get("Content-Encoding") == "gzip":
+                raw = gzip.decompress(raw)
+            return json.loads(raw.decode("utf-8"))
 
     def fetch_plate_ranking(self, date: str) -> list[dict]:
         """拉取指定交易日板块强度排名（历史域 apphis，Date 回查）。"""
@@ -270,3 +303,103 @@ class KaipanlaCollector(Collector):
                 "lead_count": _row_get(row, _STOCK_LEAD_COUNT),
             })
         return stocks
+
+    def fetch_limit_up_ladder(self, date: str) -> dict:
+        """拉取指定交易日的全市场连板梯队（GetYTFP_SCTD，历史域 apphis）。
+
+        返回按连板高度（2 板及以上）降序的梯队 + 首板数量：
+            {
+                "date": date,
+                "max_board": int,           # 最高连板（无 2 板及以上则为 0）
+                "first_board_count": int,   # 首板数量
+                "ladder": [{"board": int, "stocks": [{"code","name"}, ...]}, ...],
+            }
+        反包板（Tip=0）与打开高度标注（Tip=9）不在标准梯队内，不采集。
+        """
+        payload = self._post(_HIS_HOST, {
+            "a": "GetYTFP_SCTD",
+            "c": "FuPanLa",
+            "Date": date,
+        })
+        errcode = str(payload.get("errcode"))
+        if errcode == "1020":
+            return {"date": date, "max_board": 0, "first_board_count": 0, "ladder": []}
+        if errcode != "0":
+            raise RuntimeError(f"GetYTFP_SCTD 接口返回错误: errcode={errcode}")
+        groups = payload.get("List") or []
+        ladder_map: dict[int, list] = {}
+        first_count = 0
+        for group in groups:
+            tip = str(group.get("Tip", ""))
+            stocks = group.get("Stocks") or []
+            if tip == "1":
+                first_count = len(stocks)
+            elif tip in ("0", "9"):
+                continue  # 反包板 / 高度标注，不进标准梯队
+            else:
+                try:
+                    board = int(tip)
+                except (TypeError, ValueError):
+                    continue
+                if board >= 2:
+                    ladder_map[board] = [
+                        {"code": s.get("StockID"), "name": s.get("Name")}
+                        for s in stocks
+                    ]
+        ladder = [
+            {"board": board, "stocks": ladder_map[board]}
+            for board in sorted(ladder_map, reverse=True)
+        ]
+        return {
+            "date": date,
+            "max_board": max(ladder_map) if ladder_map else 0,
+            "first_board_count": first_count,
+            "ladder": ladder,
+        }
+
+    def fetch_serious_abnormal(self, date: str) -> dict:
+        """拉取指定交易日的严重异动（偏离值预警，GetPianLiZhi_Index，iOS 域 apphq）。
+
+        返回偏离值监控中的个股（即将触发/临近触发严重异动），结构：
+            {
+                "date": date,
+                "total": int,          # 监控池总数（Many_Num）
+                "abnormal": [          # 接口只返回偏离值最大的前几只
+                    {"code","name","flag","reason","change_pct","days",
+                     "cum_deviation","trigger_desc","trigger_threshold",
+                     "deviation_left","trigger_date","trigger_price","status"},
+                    ...
+                ],
+            }
+        非交易日（errcode=1020）返回 total=0 + 空列表。
+        """
+        payload = self._post_ios({
+            "a": "GetPianLiZhi_Index",
+            "c": "StockBidYiDong",
+            "Day": date,
+        })
+        errcode = str(payload.get("errcode"))
+        if errcode == "1020":
+            return {"date": date, "total": 0, "abnormal": []}
+        if errcode != "0":
+            raise RuntimeError(f"GetPianLiZhi_Index 接口返回错误: errcode={errcode}")
+        total = payload.get("Many_Num") or 0
+        rows = payload.get("List") or []
+        abnormal = []
+        for row in rows:
+            abnormal.append({
+                "code": _row_get(row, 0),
+                "name": _row_get(row, 1),
+                "flag": _row_get(row, 2),
+                "reason": _row_get(row, 3),
+                "change_pct": _row_get(row, 4),
+                "days": _row_get(row, 5),
+                "cum_deviation": _row_get(row, 6),
+                "trigger_desc": _row_get(row, 7),
+                "trigger_threshold": _row_get(row, 8),
+                "deviation_left": _row_get(row, 9),
+                "trigger_date": _row_get(row, 10),
+                "trigger_price": _row_get(row, 11),
+                "status": _row_get(row, 12),
+            })
+        return {"date": date, "total": total, "abnormal": abnormal}
